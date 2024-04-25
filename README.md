@@ -1,2 +1,2 @@
 # empyrical_cpp
-the header_only c++20 version of empyrical which is written by python
+using C++20 header-only to re-implement the "empyrical" project, which was originally written in Python.
