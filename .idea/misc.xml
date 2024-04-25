@@ -3,4 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="$USER_HOME$/anaconda3 (2)" />
   </component>
+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
 </project>

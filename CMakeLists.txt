@@ -19,10 +19,6 @@ include(GoogleTest)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fsanitize=address")
 
-add_definitions(
-        -UNDEBUG
-        -DDTF_HEADER_ONLY
-)
 
 include_directories(
         ./include
@@ -39,6 +35,7 @@ set(EMPYRICAL_HEADERS
 )
 
 set(EMPYRICAL_SOURCES
+
 
 )
 
