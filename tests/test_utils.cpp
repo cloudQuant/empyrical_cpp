@@ -1,13 +1,13 @@
 #include "gtest/gtest.h"
 #include "../include/empyrical/utils.hpp"
 
-class DtfTestDtStrFlags : public ::testing::Test {
+class DtfTest : public ::testing::Test {
 protected:
     // You can add setup and teardown code here if needed
 };
 
 // Test case for dt_str_flags function
-TEST_F(DtfTestDtStrFlags, TestDtStrFlags) {
+TEST_F(DtfTest, TestDtStrFlags) {
     const char *buffer1 = "2021-01-01 00:00:00";
     const char *buffer2 = "01-01-2021-00:00:00.000";
     const char *buffer3 = "2021-01-01 00.00.00.000000";
@@ -28,13 +28,8 @@ TEST_F(DtfTestDtStrFlags, TestDtStrFlags) {
 }
 
 
-class DtfTestTimestampDtStr : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for timestamp_dt_str function
-TEST_F(DtfTestTimestampDtStr, TestTimestampDtStr) {
+TEST_F(DtfTest, TestTimestampDtStr) {
     // Assuming the timestamp function returns a fixed value for testing purposes
     // You need to replace the expected string with the actual value you expect from the timestamp function
     std::string expected = "2021-01-01 00:00:00";
@@ -42,18 +37,11 @@ TEST_F(DtfTestTimestampDtStr, TestTimestampDtStr) {
     std::string str = dtf::timestamp_dt_str(dtf::flags::yyyy_mm_dd | dtf::flags::secs, 0);
     EXPECT_NE(str, expected);
 
-    // Add more test cases as needed
 }
 
 
-// Test fixture for timestamp_to_dt_chars function
-class DtfTestTimestampToDtChars : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for timestamp_to_dt_chars function
-TEST_F(DtfTestTimestampToDtChars, TestTimestampToDtChars) {
+TEST_F(DtfTest, TestTimestampToDtChars) {
     char buffer[64];
     std::uint64_t timestamp = 1609459200000000000ull; // 2021-01-01 00:00:00
 
@@ -75,14 +63,8 @@ TEST_F(DtfTestTimestampToDtChars, TestTimestampToDtChars) {
     // Add more test cases as needed
 }
 
-
-class DtfTestDtfHms : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for dtf_hms function
-TEST_F(DtfTestDtfHms, TestDtfHms) {
+TEST_F(DtfTest, TestDtfHms) {
     char buffer[3];
     char *p = dtf::dtf_hms(buffer, 0);
     *p = '\0'; // Null-terminate the string
@@ -103,15 +85,8 @@ TEST_F(DtfTestDtfHms, TestDtfHms) {
     // Add more test cases as needed
 }
 
-
-// Test fixture for dtf_day function
-class DtfTestDtfDay : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for dtf_day function
-TEST_F(DtfTestDtfDay, TestDtfDay) {
+TEST_F(DtfTest, TestDtfDay) {
     char buffer[3];
     char *p = dtf::dtf_day(buffer, 1);
     *p = '\0'; // Null-terminate the string
@@ -132,14 +107,8 @@ TEST_F(DtfTestDtfDay, TestDtfDay) {
     // Add more test cases as needed
 }
 
-
-class DtfTestDtfMonth : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for dtf_month function
-TEST_F(DtfTestDtfMonth, TestDtfMonth) {
+TEST_F(DtfTest, TestDtfMonth) {
     char buffer[3];
     char *p = dtf::dtf_month(buffer, 0);
     *p = '\0'; // Null-terminate the string
@@ -156,13 +125,8 @@ TEST_F(DtfTestDtfMonth, TestDtfMonth) {
     // Add more test cases as needed
 }
 
-class DtfTestDtfYear : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for dtf_year function
-TEST_F(DtfTestDtfYear, TestDtfYear) {
+TEST_F(DtfTest, TestDtfYear) {
     char buffer[5];
     char *p = dtf::dtf_year(buffer, 2022);
     *p = '\0'; // Null-terminate the string
@@ -179,14 +143,9 @@ TEST_F(DtfTestDtfYear, TestDtfYear) {
     // Add more test cases as needed
 }
 
-// Test fixture for timestamp_str function
-class DtfTimestampStr : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
 
 // Test case for timestamp_str function
-TEST_F(DtfTimestampStr, TestTimestampStr) {
+TEST_F(DtfTest, TestTimestampStr) {
     std::string str = timestamp_str(dtf::flags::secs, 0);
     EXPECT_FALSE(str.empty()); // Check that the string is not empty
 
@@ -199,14 +158,8 @@ TEST_F(DtfTimestampStr, TestTimestampStr) {
     // Add more test cases as needed
 }
 
-
-class DtfTestTimestampToStr : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for timestamp_to_str function
-TEST_F(DtfTestTimestampToStr, TestTimestampToStr) {
+TEST_F(DtfTest, TestTimestampToStr) {
     std::uint64_t timestamp = 1234567890000000000ull; // 1234567890 seconds
 
     std::string str = timestamp_to_str(timestamp, dtf::flags::secs);
@@ -221,13 +174,8 @@ TEST_F(DtfTestTimestampToStr, TestTimestampToStr) {
     // Add more test cases as needed
 }
 
-class DtfTestTimestampToChars : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for timestamp_to_chars function
-TEST_F(DtfTestTimestampToChars, TestTimestampToChars) {
+TEST_F(DtfTest, TestTimestampToChars) {
     char buffer[20];
     std::uint64_t timestamp = 1234567890000000000ull; // 1234567890 seconds
 
@@ -261,13 +209,8 @@ TEST_F(DtfTestTimestampToChars, TestTimestampToChars) {
 }
 
 
-class DtfTestUtoa : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test case for utoa function
-TEST_F(DtfTestUtoa, TestUtoa) {
+TEST_F(DtfTest, TestUtoa) {
     char buffer[11];
     dtf::utoa(buffer, 10, 1234567890);
     buffer[10] = 0;
@@ -286,13 +229,8 @@ TEST_F(DtfTestUtoa, TestUtoa) {
     // Add more test cases as needed
 }
 
-class DtfTestNumChars : public ::testing::Test {
-protected:
-    // You can add setup and teardown code here if needed
-};
-
 // Test cases
-TEST_F(DtfTestNumChars, TestSmallNumbers) {
+TEST_F(DtfTest, TestSmallNumbers) {
     EXPECT_EQ(dtf::num_chars(0), 1);
     EXPECT_EQ(dtf::num_chars(9), 1);
     EXPECT_EQ(dtf::num_chars(10), 2);
@@ -303,43 +241,135 @@ TEST_F(DtfTestNumChars, TestSmallNumbers) {
     // ... add more test cases for small numbers
 }
 
-TEST_F(DtfTestNumChars, TestLargeNumbers) {
+TEST_F(DtfTest, TestLargeNumbers) {
     EXPECT_EQ(dtf::num_chars(100000000000000000ull), 18);
     EXPECT_EQ(dtf::num_chars(999999999999999999ull), 18);
     EXPECT_EQ(dtf::num_chars(1000000000000000000ull), 19);
     // ... add more test cases for large numbers
 }
 
-// 测试类
-class DtfTestTimestamp : public ::testing::Test {
-protected:
-    // 设置测试环境
-    void SetUp() override {
-        // 这里可以添加一些设置代码
-    }
-
-    // 清理测试环境
-    void TearDown() override {
-        // 这里可以添加一些清理代码
-    }
-};
 
 // 测试用例
-TEST_F(DtfTestTimestamp, PositiveOffset) {
+TEST_F(DtfTest, PositiveOffset) {
     std::uint64_t before = dtf::timestamp(0);
     std::uint64_t after = dtf::timestamp(1);
     EXPECT_GT(after, before);
 }
 
-TEST_F(DtfTestTimestamp, NegativeOffset) {
+TEST_F(DtfTest, NegativeOffset) {
     std::uint64_t before = dtf::timestamp(0);
     std::uint64_t after = dtf::timestamp(-1);
     EXPECT_LT(after, before);
 }
 
-TEST_F(DtfTestTimestamp, ZeroOffset) {
+TEST_F(DtfTest, ZeroOffset) {
     std::uint64_t ts = dtf::timestamp(0);
     EXPECT_NE(ts, 0);
+}
+
+TEST_F(DtfTest, timestamptodt) {
+    std::uint64_t ts = dtf::timestamp(0);
+    std::cout << "ts = " << ts << std::endl;
+    std::size_t diff = 8*3600;
+    std::string dt = dtf::timestamp_to_dt_str(ts+diff*1000000000, dtf::flags::yyyy_mm_dd | dtf::flags::usecs | dtf::flags::sep1);
+    std::cout << "dt = " << dt << std::endl;
+    std::uint64_t new_ts = dtf::dt_to_timestamp(dt, dtf::flags::nsecs);
+    std::cout << "new_ts = "<< new_ts << std::endl;
+    EXPECT_EQ(ts, new_ts);
+    EXPECT_NE(ts, 0);
+}
+
+class RollNdarrayTest : public ::testing::Test {
+protected:
+    // You can add setup and teardown code here if needed
+};
+
+double customFunc(const std::vector<double>& vals, const std::map<std::string, double>&) {
+    double sum = 0.0;
+    for (double val : vals) {
+        sum += val;
+    }
+    return sum / static_cast<double>(vals.size());
+}
+
+TEST_F(RollNdarrayTest, BasicTest) {
+    std::vector<double> arr = {1.0, 2.0, 3.0, 4.0, 5.0};
+    std::map<std::string, double> params = {{"window", 3.0}};
+    std::vector<double> expected = {2.0, 3.0, 4.0};  // 预期的结果
+
+    // 调用 roll_ndarray 函数
+    std::vector<double> result = roll_ndarray(arr, customFunc, params);
+
+    // 断言结果是否与预期相符
+    ASSERT_EQ(result, expected);
+}
+
+TEST_F(RollNdarrayTest, ValidInput) {
+    // Create a test DataFrame
+    DataFrame df = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+
+    // Define the expected result
+    DataFrameRollingWindowResult expected_result;
+    expected_result.numWindows = 2;
+    expected_result.data = {{{1, 2, 3}, {4, 5, 6}}, {{4, 5, 6}, {7, 8, 9}}};
+
+    // Call the rolling_window function
+    int window_length = 2;
+    DataFrameRollingWindowResult result = rolling_window(df, window_length);
+
+    // Check if the result matches the expected result
+    ASSERT_EQ(result.numWindows, expected_result.numWindows);
+    ASSERT_EQ(result.data, expected_result.data);
+}
+
+// Test case for invalid window length
+TEST_F(RollNdarrayTest, InvalidWindowLength) {
+    // Create a test DataFrame
+    DataFrame df = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+
+    // Call the rolling_window function with an invalid window length
+    int window_length = 0;
+
+    // Check if the function throws the expected exception
+    ASSERT_THROW(rolling_window(df, window_length), std::invalid_argument);
+}
+
+
+TEST_F(RollNdarrayTest, PositiveWindowLength) {
+    Array arr = {1, 2, 3, 4, 5};
+    int length = 3;
+
+    ArrayRollingWindowResult result = rolling_window(arr, length);
+
+    ArrayRollingWindowResult expect_result;
+    expect_result.numWindows = 3;
+    expect_result.data = {
+            {1,2,3},
+            {2,3,4},
+            {3,4,5}
+    };
+
+    EXPECT_EQ(result.numWindows, arr.size() - length + 1);
+    EXPECT_EQ(result.data, expect_result.data);
+
+}
+
+// Test case for zero window length
+TEST_F(RollNdarrayTest, ZeroWindowLength) {
+    Array arr = {1, 2, 3, 4, 5};
+    int length = 0;
+
+    // Check if the function throws an invalid_argument exception
+    EXPECT_THROW(rolling_window(arr, length), std::invalid_argument);
+}
+
+// Test case for window length greater than array size
+TEST_F(RollNdarrayTest, WindowLengthGreaterThanArraySize) {
+    Array arr = {1, 2, 3, 4, 5};
+    int length = 10;
+
+    // Check if the function throws an invalid_argument exception
+    EXPECT_THROW(rolling_window(arr, length), std::invalid_argument);
 }
 
 

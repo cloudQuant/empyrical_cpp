@@ -7,19 +7,29 @@
 #include <map>
 #include <string>
 #include <chrono>
-#include <iomanip> // 用于处理时间格式
-#include <chrono>
 #include <utility>
-//#include <cmath>
+#include <cmath>
+#include <limits>
 #include <cassert>
 #include <cstring>
+#include <iomanip>
 #define DTF_INLINE inline
 
 // 假设 func 是一个接受两个参数的函数
 using CustomFunc = std::function<double(const std::vector<double>&,
                                         const std::map<std::string, double>)>;
 
+using Array = std::vector<double>;
 using DataFrame = std::vector<std::vector<double>>;
+
+struct ArrayRollingWindowResult {
+    std::vector<Array> data;
+    std::size_t numWindows{};
+};
+struct DataFrameRollingWindowResult {
+    std::vector<DataFrame> data;
+    std::size_t numWindows{};
+};
 
 
 
@@ -44,7 +54,9 @@ struct flags {
 /*************************************************************************************************/
 
 /*
- * 这段代码定义了一个名为 timestamp 的函数，它接受一个整数 offset 作为参数，并返回一个 std::uint64_t 类型的值。
+ * 这段代码定义了一个名为 timestamp 的函数，
+ * 它接受一个整数 offset 作为参数，
+ * 并返回一个 std::uint64_t 类型的值。
  * 这个函数用于获取当前的时间戳，并根据提供的偏移量进行调整。
  */
 DTF_INLINE std::uint64_t timestamp(int offset) {
@@ -59,7 +71,10 @@ DTF_INLINE std::uint64_t timestamp(int offset) {
 
 /*************************************************************************************************/
 /*
- * 这段代码定义了一个名为 num_chars 的函数，它接受一个 std::size_t 类型的参数 v，并返回一个 std::size_t 类型的值。这个函数用于计算一个数字的位数。
+ * 这段代码定义了一个名为 num_chars 的函数，
+ * 它接受一个 std::size_t 类型的参数 v，
+ * 并返回一个 std::size_t 类型的值。
+ * 这个函数用于计算一个数字的位数。
  */
 DTF_INLINE std::size_t num_chars(std::size_t v) {
     // MAX LEN OF SIZE_T IS 20
@@ -233,13 +248,6 @@ DTF_INLINE std::size_t timestamp_to_dt_chars(char *ptr, std::uint64_t ts, std::s
         ;
     std::size_t mons = i;
     days += work - spm[i];
-//    std::cout << "work = " << work <<std::endl;
-//    std::cout << "years = " << years << std::endl;
-//    std::cout << "month = " << mons << std::endl;
-//    std::cout << "day = " << days << std::endl;
-//    std::cout << "hours = " << hours << std::endl;
-//    std::cout << "mins = " << mins << std::endl;
-//    std::cout << "secs = " << secs << std::endl;
     char *p = ptr;
     std::memset(p, '0', bufsize);
 
@@ -334,23 +342,217 @@ DTF_INLINE std::size_t dt_str_flags(const char *buf, std::size_t n) {
     return res;
 }
 
+DTF_INLINE std::uint64_t dt_to_timestamp(const std::string& input_dt, std::size_t f){
+    std::tm tm = {};
+    std::istringstream ss(input_dt);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+
+    // Extract microseconds from the input string
+    std::string microsec_str;
+    ss >> microsec_str;
+    std::size_t pos = microsec_str.find('.');
+    int microseconds = 0;
+    if (pos != std::string::npos && pos + 1 < microsec_str.size()) {
+        microsec_str = microsec_str.substr(pos + 1); // Extract fractional part
+        microseconds = std::stoi(microsec_str);
+    }
+
+    // Convert std::tm to std::chrono::system_clock::time_point
+    std::chrono::system_clock::time_point tp = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+
+    // Add microseconds to the time_point
+    tp += std::chrono::microseconds(microseconds);
+
+    // Convert time_point to specified time unit timestamp
+    bool v1 = f == dtf::flags::msecs;
+    bool v2 = f == dtf::flags::usecs;
+    bool v3 = f == dtf::flags::nsecs;
+    if (v1) {
+        std::chrono::milliseconds duration = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch());
+        return duration.count();
+    } else if (v2) {
+        std::chrono::microseconds duration = std::chrono::duration_cast<std::chrono::microseconds>(
+                tp.time_since_epoch());
+        return duration.count();
+    }else if (v3){
+        std::chrono::nanoseconds duration = std::chrono::duration_cast<std::chrono::nanoseconds>(tp.time_since_epoch());
+        return duration.count();
+    } else {
+        std::chrono::seconds duration = std::chrono::duration_cast<std::chrono::seconds>(tp.time_since_epoch());
+        return duration.count();
+    }
+    }
+
 /*************************************************************************************************/
 
 } // ns dtf
 
-//std::vector<double> _roll_ndarray(const std::vector<double>& arr,
-//                                const CustomFunc& func,
-//                                const std::map<std::string, double>& params) {
-//    std::vector<double> data;
-//    std::size_t window = static_cast<std::size_t>(params["window"]);
-//    for (std::size_t i = window; i <= arr.size(); ++i) {
-//        std::vector<double> rets(arr.begin() + (i - window), arr.begin() + i));
-//        data.push_back(func(rets, params));  // 调用 func 函数
-//    }
-//    return data;
-//}
+
+std::vector<double> roll_ndarray(const std::vector<double>& arr,
+                                  const CustomFunc& func,
+                                  const std::map<std::string, double>& params) {
+    std::vector<double> data;
+    int window = static_cast<int>(params.at("window"));
+    data.reserve(arr.size() - window + 1);  // 提前预留空间
+
+    // 初始化窗口数据
+    std::vector<double> rets(arr.begin(), arr.begin() + window);
+
+    // 计算初始窗口的值
+    data.push_back(func(rets, params));
+
+    // 滑动窗口计算后续值
+    for (std::size_t i = window; i < arr.size(); ++i) {
+        // 滑动窗口移除第一个元素，添加新元素
+        rets.erase(rets.begin());
+        rets.push_back(arr[i]);
+        data.push_back(func(rets, params));
+    }
+
+    return data;
+}
 
 
+DataFrameRollingWindowResult rolling_window(const DataFrame & df, int length) {
+    // Check for valid input
+    if (length <= 0) {
+        throw std::invalid_argument("Window length must be positive");
+    }
+
+    std::size_t origRows = df.size();
+    std::size_t origCols = df[0].size();
+
+    if (origRows < static_cast<std::size_t>(length)) {
+        throw std::invalid_argument("Cannot create windows of length " + std::to_string(length)
+                                    + " from an array with fewer rows");
+    }
+
+    std::size_t numWindows = origRows - length + 1;
+
+    DataFrameRollingWindowResult result;
+    result.numWindows = numWindows;
+
+    // Resize the data vector to hold the result
+    result.data.resize(numWindows, DataFrame(length, std::vector<double>(origCols, 0)));
+
+    // Populate the rolling window result
+    for (std::size_t i = 0; i < numWindows; ++i) {
+        for (int j = 0; j < length; ++j) {
+            for (std::size_t k = 0; k < origCols; ++k) {
+                result.data[i][j][k] = df[i + j][k];
+            }
+        }
+    }
+
+
+    return result;
+}
+
+ArrayRollingWindowResult rolling_window(const Array & arr, int length) {
+    // Check for valid input
+    if (length <= 0) {
+        throw std::invalid_argument("Window length must be positive");
+    }
+
+    std::size_t origRows = arr.size();
+
+    if (origRows < static_cast<std::size_t>(length)) {
+        throw std::invalid_argument("Cannot create windows of length " + std::to_string(length)
+                                    + " from an array with fewer rows");
+    }
+
+    std::size_t numWindows = origRows - length + 1;
+
+    ArrayRollingWindowResult result;
+    result.numWindows = numWindows;
+
+    // Resize the data vector to hold the result
+    result.data.resize(numWindows);
+
+    // Populate the rolling window result
+    for (std::size_t i = 0; i < numWindows; ++i) {
+        result.data[i].resize(length);
+        for (int j = 0; j < length; ++j) {
+            result.data[i][j] = arr[i + j];
+        }
+    }
+
+    return result;
+}
+
+
+double nan_mean(const std::vector<double>& arr) {
+    double sum = 0.0;
+    int count = 0;
+    for (const auto& num : arr) {
+        if (!std::isnan(num)) {
+            sum += num;
+            ++count;
+        }
+    }
+    return count > 0 ? sum / count : std::numeric_limits<double>::quiet_NaN();
+}
+
+double nan_std(const std::vector<double>& arr, int d_dof=0) {
+    double mean = nan_mean(arr);
+    double sum = 0.0;
+    int count = 0;
+    for (const auto& num : arr) {
+        if (!std::isnan(num)) {
+            sum += (num - mean) * (num - mean);
+            ++count;
+        }
+    }
+    return count > 1 ? std::sqrt(sum / (count - d_dof)) : std::numeric_limits<double>::quiet_NaN();
+}
+
+double nan_sum(const std::vector<double>& arr) {
+    double sum = 0.0;
+    for (const auto& num : arr) {
+        if (!std::isnan(num)) {
+            sum += num;
+        }
+    }
+    return sum;
+}
+
+double nan_max(const std::vector<double>& arr) {
+    auto it = std::max_element(arr.begin(), arr.end(), [](double a, double b) {
+        return (std::isnan(a) || a < b);
+    });
+    return (it != arr.end() && !std::isnan(*it)) ? *it : std::numeric_limits<double>::quiet_NaN();
+}
+
+double nan_min(const std::vector<double>& arr) {
+    auto it = std::min_element(arr.begin(), arr.end(), [](double a, double b) {
+        return (std::isnan(a) || a > b);
+    });
+    return (it != arr.end() && !std::isnan(*it)) ? *it : std::numeric_limits<double>::quiet_NaN();
+}
+
+std::size_t nan_argmax(const std::vector<double>& arr) {
+    std::size_t idx = 0;
+    double max_val = std::numeric_limits<double>::quiet_NaN();
+    for (std::size_t i = 0; i < arr.size(); ++i) {
+        if (!std::isnan(arr[i]) && (std::isnan(max_val) || arr[i] > max_val)) {
+            max_val = arr[i];
+            idx = i;
+        }
+    }
+    return idx;
+}
+
+std::size_t nan_argmin(const std::vector<double>& arr) {
+    std::size_t idx = 0;
+    double min_val = std::numeric_limits<double>::quiet_NaN();
+    for (std::size_t i = 0; i < arr.size(); ++i) {
+        if (!std::isnan(arr[i]) && (std::isnan(min_val) || arr[i] < min_val)) {
+            min_val = arr[i];
+            idx = i;
+        }
+    }
+    return idx;
+}
 
 //std::vector<double> _roll_pandas(const DataFrame& df,
 //                                  CustomFunc func,
@@ -364,22 +566,8 @@ DTF_INLINE std::size_t dt_str_flags(const char *buf, std::size_t n) {
 //    return data;
 //}
 //
-//// 示例自定义函数，计算两个向量的平均值
-//double custom_avg_func(const std::vector<double>& arr1, const std::vector<double>& arr2) {
-//    double sum = 0.0;
-//    for (std::size_t i = 0; i < arr1.size(); ++i) {
-//        sum += arr1[i] + arr2[i];
-//    }
-//    return sum / arr1.size();
-//}
-//int main() {
-//    // 测试示例
-//    std::string input_dt = "2024-04-10 12:00:00";  // 输入的时间字符串
-//    std::string utc_dt = get_utc_timestamp(input_dt);
-//    std::cout << "UTC Time: " << utc_dt;
-//
-//    return 0;
-//}
+
+
 
 #endif // EMPYRICAL_UTILS
 

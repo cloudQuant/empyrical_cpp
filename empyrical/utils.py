@@ -170,12 +170,12 @@ def down(returns, factor_returns, **kwargs):
     return func(returns, factor_returns, **kwargs)
 
 
-def _roll_ndarray(func, window, *args, **kwargs):
-    data = []
-    for i in range(window, len(args[0]) + 1):
-        rets = [s[i-window:i] for s in args]
-        data.append(func(*rets, **kwargs))
-    return np.array(data)
+# def _roll_ndarray(func, window, *args, **kwargs):
+#     data = []
+#     for i in range(window, len(args[0]) + 1):
+#         rets = [s[i-window:i] for s in args]
+#         data.append(func(*rets, **kwargs))
+#     return np.array(data)
 
 
 def _roll_pandas(func, window, *args, **kwargs):
