@@ -131,186 +131,186 @@ def _flatten(arr):
     return arr if not isinstance(arr, pd.Series) else arr.values
 
 
-def _adjust_returns(returns, adjustment_factor):
-    """
-    Returns the returns series adjusted by adjustment_factor. Optimizes for the
-    case of adjustment_factor being 0 by returning returns itself, not a copy!
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-    adjustment_factor : pd.Series or np.ndarray or float or int
-
-    Returns
-    -------
-    adjusted_returns : array-like
-    """
-    if isinstance(adjustment_factor, (float, int)) and adjustment_factor == 0:
-        return returns
-    return returns - adjustment_factor
-
-
-def annualization_factor(period, annualization):
-    """
-    Return annualization factor from period entered or if a custom
-    value is passed in.
-
-    Parameters
-    ----------
-    period : str, optional
-        Defines the periodicity of the 'returns' data for purposes of
-        annualizing. Value ignored if `annualization` parameter is specified.
-        Defaults are::
-
-            'monthly':12
-            'weekly': 52
-            'daily': 252
-
-    annualization : int, optional
-        Used to suppress default values available in `period` to convert
-        returns into annual returns. Value should be the annual frequency of
-        `returns`.
-
-    Returns
-    -------
-    annualization_factor : float
-    """
-    if annualization is None:
-        try:
-            factor = ANNUALIZATION_FACTORS[period]
-        except KeyError:
-            raise ValueError(
-                "Period cannot be '{}'. "
-                "Can be '{}'.".format(
-                    period, "', '".join(ANNUALIZATION_FACTORS.keys())
-                )
-            )
-    else:
-        factor = annualization
-    return factor
+# def _adjust_returns(returns, adjustment_factor):
+#     """
+#     Returns the returns series adjusted by adjustment_factor. Optimizes for the
+#     case of adjustment_factor being 0 by returning returns itself, not a copy!
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#     adjustment_factor : pd.Series or np.ndarray or float or int
+#
+#     Returns
+#     -------
+#     adjusted_returns : array-like
+#     """
+#     if isinstance(adjustment_factor, (float, int)) and adjustment_factor == 0:
+#         return returns
+#     return returns - adjustment_factor
 
 
-def simple_returns(prices):
-    """
-    Compute simple returns from a timeseries of prices.
-
-    Parameters
-    ----------
-    prices : pd.Series, pd.DataFrame or np.ndarray
-        Prices of assets in wide-format, with assets as columns,
-        and indexed by datetimes.
-
-    Returns
-    -------
-    returns : array-like
-        Returns of assets in wide-format, with assets as columns,
-        and index coerced to be tz-aware.
-    """
-    if isinstance(prices, (pd.DataFrame, pd.Series)):
-        out = prices.pct_change().iloc[1:]
-    else:
-        # Assume np.ndarray
-        out = np.diff(prices, axis=0)
-        np.divide(out, prices[:-1], out=out)
-
-    return out
-
-
-def cum_returns(returns, starting_value=0, out=None):
-    """
-    Compute cumulative returns from simple returns.
-
-    Parameters
-    ----------
-    returns : pd.Series, np.ndarray, or pd.DataFrame
-        Returns of the strategy as a percentage, noncumulative.
-         - Time series with decimal returns.
-         - Example::
-
-            2015-07-16   -0.012143
-            2015-07-17    0.045350
-            2015-07-20    0.030957
-            2015-07-21    0.004902
-
-         - Also accepts two dimensional data. In this case, each column is
-           cumulated.
-
-    starting_value : float, optional
-       The starting returns.
-    out : array-like, optional
-        Array to use as output buffer.
-        If not passed, a new array will be created.
-
-    Returns
-    -------
-    cumulative_returns : array-like
-        Series of cumulative returns.
-    """
-    if len(returns) < 1:
-        return returns.copy()
-
-    nanmask = np.isnan(returns)
-    if np.any(nanmask):
-        returns = returns.copy()
-        returns[nanmask] = 0
-
-    allocated_output = out is None
-    if allocated_output:
-        out = np.empty_like(returns)
-
-    np.add(returns, 1, out=out)
-    out.cumprod(axis=0, out=out)
-
-    if starting_value == 0:
-        np.subtract(out, 1, out=out)
-    else:
-        np.multiply(out, starting_value, out=out)
-
-    if allocated_output:
-        if returns.ndim == 1 and isinstance(returns, pd.Series):
-            out = pd.Series(out, index=returns.index)
-        elif isinstance(returns, pd.DataFrame):
-            out = pd.DataFrame(
-                out, index=returns.index, columns=returns.columns,
-            )
-
-    return out
+# def annualization_factor(period, annualization):
+#     """
+#     Return annualization factor from period entered or if a custom
+#     value is passed in.
+#
+#     Parameters
+#     ----------
+#     period : str, optional
+#         Defines the periodicity of the 'returns' data for purposes of
+#         annualizing. Value ignored if `annualization` parameter is specified.
+#         Defaults are::
+#
+#             'monthly':12
+#             'weekly': 52
+#             'daily': 252
+#
+#     annualization : int, optional
+#         Used to suppress default values available in `period` to convert
+#         returns into annual returns. Value should be the annual frequency of
+#         `returns`.
+#
+#     Returns
+#     -------
+#     annualization_factor : float
+#     """
+#     if annualization is None:
+#         try:
+#             factor = ANNUALIZATION_FACTORS[period]
+#         except KeyError:
+#             raise ValueError(
+#                 "Period cannot be '{}'. "
+#                 "Can be '{}'.".format(
+#                     period, "', '".join(ANNUALIZATION_FACTORS.keys())
+#                 )
+#             )
+#     else:
+#         factor = annualization
+#     return factor
 
 
-def cum_returns_final(returns, starting_value=0):
-    """
-    Compute total returns from simple returns.
+# def simple_returns(prices):
+#     """
+#     Compute simple returns from a timeseries of prices.
+#
+#     Parameters
+#     ----------
+#     prices : pd.Series, pd.DataFrame or np.ndarray
+#         Prices of assets in wide-format, with assets as columns,
+#         and indexed by datetimes.
+#
+#     Returns
+#     -------
+#     returns : array-like
+#         Returns of assets in wide-format, with assets as columns,
+#         and index coerced to be tz-aware.
+#     """
+#     if isinstance(prices, (pd.DataFrame, pd.Series)):
+#         out = prices.pct_change().iloc[1:]
+#     else:
+#         # Assume np.ndarray
+#         out = np.diff(prices, axis=0)
+#         np.divide(out, prices[:-1], out=out)
+#
+#     return out
 
-    Parameters
-    ----------
-    returns : pd.DataFrame, pd.Series, or np.ndarray
-       Noncumulative simple returns of one or more timeseries.
-    starting_value : float, optional
-       The starting returns.
 
-    Returns
-    -------
-    total_returns : pd.Series, np.ndarray, or float
-        If input is 1-dimensional (a Series or 1D numpy array), the result is a
-        scalar.
+# def cum_returns(returns, starting_value=0, out=None):
+#     """
+#     Compute cumulative returns from simple returns.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series, np.ndarray, or pd.DataFrame
+#         Returns of the strategy as a percentage, noncumulative.
+#          - Time series with decimal returns.
+#          - Example::
+#
+#             2015-07-16   -0.012143
+#             2015-07-17    0.045350
+#             2015-07-20    0.030957
+#             2015-07-21    0.004902
+#
+#          - Also accepts two dimensional data. In this case, each column is
+#            cumulated.
+#
+#     starting_value : float, optional
+#        The starting returns.
+#     out : array-like, optional
+#         Array to use as output buffer.
+#         If not passed, a new array will be created.
+#
+#     Returns
+#     -------
+#     cumulative_returns : array-like
+#         Series of cumulative returns.
+#     """
+#     if len(returns) < 1:
+#         return returns.copy()
+#
+#     nanmask = np.isnan(returns)
+#     if np.any(nanmask):
+#         returns = returns.copy()
+#         returns[nanmask] = 0
+#
+#     allocated_output = out is None
+#     if allocated_output:
+#         out = np.empty_like(returns)
+#
+#     np.add(returns, 1, out=out)
+#     out.cumprod(axis=0, out=out)
+#
+#     if starting_value == 0:
+#         np.subtract(out, 1, out=out)
+#     else:
+#         np.multiply(out, starting_value, out=out)
+#
+#     if allocated_output:
+#         if returns.ndim == 1 and isinstance(returns, pd.Series):
+#             out = pd.Series(out, index=returns.index)
+#         elif isinstance(returns, pd.DataFrame):
+#             out = pd.DataFrame(
+#                 out, index=returns.index, columns=returns.columns,
+#             )
+#
+#     return out
 
-        If input is 2-dimensional (a DataFrame or 2D numpy array), the result
-        is a 1D array containing cumulative returns for each column of input.
-    """
-    if len(returns) == 0:
-        return np.nan
 
-    if isinstance(returns, pd.DataFrame):
-        result = (returns + 1).prod()
-    else:
-        result = np.nanprod(returns + 1, axis=0)
-
-    if starting_value == 0:
-        result -= 1
-    else:
-        result *= starting_value
-
-    return result
+# def cum_returns_final(returns, starting_value=0):
+#     """
+#     Compute total returns from simple returns.
+#
+#     Parameters
+#     ----------
+#     returns : pd.DataFrame, pd.Series, or np.ndarray
+#        Noncumulative simple returns of one or more timeseries.
+#     starting_value : float, optional
+#        The starting returns.
+#
+#     Returns
+#     -------
+#     total_returns : pd.Series, np.ndarray, or float
+#         If input is 1-dimensional (a Series or 1D numpy array), the result is a
+#         scalar.
+#
+#         If input is 2-dimensional (a DataFrame or 2D numpy array), the result
+#         is a 1D array containing cumulative returns for each column of input.
+#     """
+#     if len(returns) == 0:
+#         return np.nan
+#
+#     if isinstance(returns, pd.DataFrame):
+#         result = (returns + 1).prod()
+#     else:
+#         result = np.nanprod(returns + 1, axis=0)
+#
+#     if starting_value == 0:
+#         result -= 1
+#     else:
+#         result *= starting_value
+#
+#     return result
 
 
 def aggregate_returns(returns, convert_to):
@@ -349,195 +349,195 @@ def aggregate_returns(returns, convert_to):
     return returns.groupby(grouping).apply(cumulate_returns)
 
 
-def max_drawdown(returns, out=None):
-    """
-    Determines the maximum drawdown of a strategy.
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    out : array-like, optional
-        Array to use as output buffer.
-        If not passed, a new array will be created.
-
-    Returns
-    -------
-    max_drawdown : float
-
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
-    """
-    allocated_output = out is None
-    if allocated_output:
-        out = np.empty(returns.shape[1:])
-
-    returns_1d = returns.ndim == 1
-
-    if len(returns) < 1:
-        out[()] = np.nan
-        if returns_1d:
-            out = out.item()
-        return out
-
-    returns_array = np.asanyarray(returns)
-
-    cumulative = np.empty(
-        (returns.shape[0] + 1,) + returns.shape[1:],
-        dtype='float64',
-    )
-    cumulative[0] = start = 100
-    cum_returns(returns_array, starting_value=start, out=cumulative[1:])
-
-    max_return = np.fmax.accumulate(cumulative, axis=0)
-
-    nanmin((cumulative - max_return) / max_return, axis=0, out=out)
-    if returns_1d:
-        out = out.item()
-    elif allocated_output and isinstance(returns, pd.DataFrame):
-        out = pd.Series(out)
-
-    return out
+# def max_drawdown(returns, out=None):
+#     """
+#     Determines the maximum drawdown of a strategy.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     out : array-like, optional
+#         Array to use as output buffer.
+#         If not passed, a new array will be created.
+#
+#     Returns
+#     -------
+#     max_drawdown : float
+#
+#     Note
+#     -----
+#     See https://en.wikipedia.org/wiki/Drawdown_(economics) for more details.
+#     """
+#     allocated_output = out is None
+#     if allocated_output:
+#         out = np.empty(returns.shape[1:])
+#
+#     returns_1d = returns.ndim == 1
+#
+#     if len(returns) < 1:
+#         out[()] = np.nan
+#         if returns_1d:
+#             out = out.item()
+#         return out
+#
+#     returns_array = np.asanyarray(returns)
+#
+#     cumulative = np.empty(
+#         (returns.shape[0] + 1,) + returns.shape[1:],
+#         dtype='float64',
+#     )
+#     cumulative[0] = start = 100
+#     cum_returns(returns_array, starting_value=start, out=cumulative[1:])
+#
+#     max_return = np.fmax.accumulate(cumulative, axis=0)
+#
+#     nanmin((cumulative - max_return) / max_return, axis=0, out=out)
+#     if returns_1d:
+#         out = out.item()
+#     elif allocated_output and isinstance(returns, pd.DataFrame):
+#         out = pd.Series(out)
+#
+#     return out
 
 
 roll_max_drawdown = _create_unary_vectorized_roll_function(max_drawdown)
 
 
-def annual_return(returns, period=DAILY, annualization=None):
-    """
-    Determines the mean annual growth rate of returns. This is equivilent
-    to the compound annual growth rate.
+# def annual_return(returns, period=DAILY, annualization=None):
+#     """
+#     Determines the mean annual growth rate of returns. This is equivilent
+#     to the compound annual growth rate.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Periodic returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     period : str, optional
+#         Defines the periodicity of the 'returns' data for purposes of
+#         annualizing. Value ignored if `annualization` parameter is specified.
+#         Defaults are::
+#
+#             'monthly':12
+#             'weekly': 52
+#             'daily': 252
+#
+#     annualization : int, optional
+#         Used to suppress default values available in `period` to convert
+#         returns into annual returns. Value should be the annual frequency of
+#         `returns`.
+#
+#     Returns
+#     -------
+#     annual_return : float
+#         Annual Return as CAGR (Compounded Annual Growth Rate).
+#
+#     """
+#
+#     if len(returns) < 1:
+#         return np.nan
+#
+#     ann_factor = annualization_factor(period, annualization)
+#     num_years = len(returns) / ann_factor
+#     # Pass array to ensure index -1 looks up successfully.
+#     ending_value = cum_returns_final(returns, starting_value=1)
+#
+#     return ending_value ** (1 / num_years) - 1
 
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Periodic returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    period : str, optional
-        Defines the periodicity of the 'returns' data for purposes of
-        annualizing. Value ignored if `annualization` parameter is specified.
-        Defaults are::
 
-            'monthly':12
-            'weekly': 52
-            'daily': 252
-
-    annualization : int, optional
-        Used to suppress default values available in `period` to convert
-        returns into annual returns. Value should be the annual frequency of
-        `returns`.
-
-    Returns
-    -------
-    annual_return : float
-        Annual Return as CAGR (Compounded Annual Growth Rate).
-
-    """
-
-    if len(returns) < 1:
-        return np.nan
-
-    ann_factor = annualization_factor(period, annualization)
-    num_years = len(returns) / ann_factor
-    # Pass array to ensure index -1 looks up successfully.
-    ending_value = cum_returns_final(returns, starting_value=1)
-
-    return ending_value ** (1 / num_years) - 1
-
-
-def cagr(returns, period=DAILY, annualization=None):
-    """
-    Compute compound annual growth rate. Alias function for
-    :func:`~empyrical.stats.annual_return`
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    period : str, optional
-        Defines the periodicity of the 'returns' data for purposes of
-        annualizing. Value ignored if `annualization` parameter is specified.
-        Defaults are::
-
-            'monthly':12
-            'weekly': 52
-            'daily': 252
-
-    annualization : int, optional
-        Used to suppress default values available in `period` to convert
-        returns into annual returns. Value should be the annual frequency of
-        `returns`.
-        - See full explanation in :func:`~empyrical.stats.annual_return`.
-
-    Returns
-    -------
-    cagr : float
-        The CAGR value.
-
-    """
-    return annual_return(returns, period, annualization)
+# def cagr(returns, period=DAILY, annualization=None):
+#     """
+#     Compute compound annual growth rate. Alias function for
+#     :func:`~empyrical.stats.annual_return`
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     period : str, optional
+#         Defines the periodicity of the 'returns' data for purposes of
+#         annualizing. Value ignored if `annualization` parameter is specified.
+#         Defaults are::
+#
+#             'monthly':12
+#             'weekly': 52
+#             'daily': 252
+#
+#     annualization : int, optional
+#         Used to suppress default values available in `period` to convert
+#         returns into annual returns. Value should be the annual frequency of
+#         `returns`.
+#         - See full explanation in :func:`~empyrical.stats.annual_return`.
+#
+#     Returns
+#     -------
+#     cagr : float
+#         The CAGR value.
+#
+#     """
+#     return annual_return(returns, period, annualization)
 
 
 roll_cagr = _create_unary_vectorized_roll_function(cagr)
 
 
-def annual_volatility(returns,
-                      period=DAILY,
-                      alpha=2.0,
-                      annualization=None,
-                      out=None):
-    """
-    Determines the annual volatility of a strategy.
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Periodic returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    period : str, optional
-        Defines the periodicity of the 'returns' data for purposes of
-        annualizing. Value ignored if `annualization` parameter is specified.
-        Defaults are::
-
-            'monthly':12
-            'weekly': 52
-            'daily': 252
-
-    alpha : float, optional
-        Scaling relation (Levy stability exponent).
-    annualization : int, optional
-        Used to suppress default values available in `period` to convert
-        returns into annual returns. Value should be the annual frequency of
-        `returns`.
-    out : array-like, optional
-        Array to use as output buffer.
-        If not passed, a new array will be created.
-
-    Returns
-    -------
-    annual_volatility : float
-    """
-    allocated_output = out is None
-    if allocated_output:
-        out = np.empty(returns.shape[1:])
-
-    returns_1d = returns.ndim == 1
-
-    if len(returns) < 2:
-        out[()] = np.nan
-        if returns_1d:
-            out = out.item()
-        return out
-
-    ann_factor = annualization_factor(period, annualization)
-    nanstd(returns, ddof=1, axis=0, out=out)
-    out = np.multiply(out, ann_factor ** (1.0 / alpha), out=out)
-    if returns_1d:
-        out = out.item()
-    return out
+# def annual_volatility(returns,
+#                       period=DAILY,
+#                       alpha=2.0,
+#                       annualization=None,
+#                       out=None):
+#     """
+#     Determines the annual volatility of a strategy.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Periodic returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     period : str, optional
+#         Defines the periodicity of the 'returns' data for purposes of
+#         annualizing. Value ignored if `annualization` parameter is specified.
+#         Defaults are::
+#
+#             'monthly':12
+#             'weekly': 52
+#             'daily': 252
+#
+#     alpha : float, optional
+#         Scaling relation (Levy stability exponent).
+#     annualization : int, optional
+#         Used to suppress default values available in `period` to convert
+#         returns into annual returns. Value should be the annual frequency of
+#         `returns`.
+#     out : array-like, optional
+#         Array to use as output buffer.
+#         If not passed, a new array will be created.
+#
+#     Returns
+#     -------
+#     annual_volatility : float
+#     """
+#     allocated_output = out is None
+#     if allocated_output:
+#         out = np.empty(returns.shape[1:])
+#
+#     returns_1d = returns.ndim == 1
+#
+#     if len(returns) < 2:
+#         out[()] = np.nan
+#         if returns_1d:
+#             out = out.item()
+#         return out
+#
+#     ann_factor = annualization_factor(period, annualization)
+#     nanstd(returns, ddof=1, axis=0, out=out)
+#     out = np.multiply(out, ann_factor ** (1.0 / alpha), out=out)
+#     if returns_1d:
+#         out = out.item()
+#     return out
 
 
 roll_annual_volatility = _create_unary_vectorized_roll_function(
