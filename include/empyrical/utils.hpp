@@ -518,20 +518,26 @@ double nan_sum(const std::vector<double>& arr) {
 
 double nan_max(const std::vector<double>& arr) {
     auto it = std::max_element(arr.begin(), arr.end(), [](double a, double b) {
-        return (std::isnan(a) || a < b);
+        return std::isnan(a) || a < b;
     });
     return (it != arr.end() && !std::isnan(*it)) ? *it : std::numeric_limits<double>::quiet_NaN();
 }
 
 double nan_min(const std::vector<double>& arr) {
     auto it = std::min_element(arr.begin(), arr.end(), [](double a, double b) {
-        return (std::isnan(a) || a > b);
+        // If 'a' is NaN, return false
+        if (std::isnan(a)) return false;
+        // If 'b' is NaN, return true
+        if (std::isnan(b)) return true;
+        // Otherwise, return whether 'a' is less than 'b'
+        return a < b;
     });
+    // Check if a valid iterator was found and if the value is not NaN
     return (it != arr.end() && !std::isnan(*it)) ? *it : std::numeric_limits<double>::quiet_NaN();
 }
 
 std::size_t nan_argmax(const std::vector<double>& arr) {
-    std::size_t idx = 0;
+    std::size_t idx = -1;
     double max_val = std::numeric_limits<double>::quiet_NaN();
     for (std::size_t i = 0; i < arr.size(); ++i) {
         if (!std::isnan(arr[i]) && (std::isnan(max_val) || arr[i] > max_val)) {
@@ -543,7 +549,7 @@ std::size_t nan_argmax(const std::vector<double>& arr) {
 }
 
 std::size_t nan_argmin(const std::vector<double>& arr) {
-    std::size_t idx = 0;
+    std::size_t idx = -1;
     double min_val = std::numeric_limits<double>::quiet_NaN();
     for (std::size_t i = 0; i < arr.size(); ++i) {
         if (!std::isnan(arr[i]) && (std::isnan(min_val) || arr[i] < min_val)) {
@@ -553,6 +559,10 @@ std::size_t nan_argmin(const std::vector<double>& arr) {
     }
     return idx;
 }
+
+
+
+
 
 //std::vector<double> _roll_pandas(const DataFrame& df,
 //                                  CustomFunc func,
