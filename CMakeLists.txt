@@ -31,11 +31,13 @@ if (DEFINED ${BOOST_INCLUDE_DIR})
 endif()
 
 set(EMPYRICAL_HEADERS
-        empyrical/utils.hpp
+        empyrical/utils.h
+        empyrical/perf_attrib.h
+        empyrical/constants.h
+        empyrical/stats.h
 )
 
 set(EMPYRICAL_SOURCES
-
 
 )
 
@@ -56,10 +58,6 @@ endif()
 
 target_link_libraries(
         ${PROJECT_NAME}
-        z
-        crypto
-        ssl
-        pthread
 )
 
 
@@ -69,12 +67,15 @@ enable_testing()
 add_executable(
         empyrical_test
         tests/test_utils.cpp
+        tests/test_stats.cpp
+        tests/test_perf_attrib.cpp
 
 )
 
 target_link_libraries(
         empyrical_test
         GTest::gtest_main
+
 )
 
 gtest_discover_tests(empyrical_test)
