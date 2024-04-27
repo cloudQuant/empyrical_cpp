@@ -164,10 +164,60 @@ TEST_F(StatsTest, annual_volatility_BasicTest) {
     std::vector<double> returns2 = {0.02, 0.04, 0.03, -0.05, 0.06, 0.02};
 
     // 调用函数计算年化波动率
-    double annual_vol1 = annual_volatility(returns1, "daily");
-    double annual_vol2 = annual_volatility(returns2, "weekly", 1);
+    double annual_vol1 = annual_volatility_from_simple_return(returns1, "daily");
+    double annual_vol2 = annual_volatility_from_simple_return(returns2, "weekly", 1);
 
     // 验证计算结果
     EXPECT_NEAR(annual_vol1, 0.83155757, 1e-6);
     EXPECT_NEAR(annual_vol2, 0.2698147512, 1e-6);
+}
+
+TEST_F(StatsTest, CalmarRatioTest_MaxDrawdownNegative) {
+    std::vector<double> returns = {-0.05, 0.1, -0.02, 0.03, -0.08};  // 负回报率示例
+    double calmar = calmar_ratio_from_simple_return(returns, "daily");
+    EXPECT_FALSE(std::isnan(calmar));
+}
+
+TEST_F(StatsTest, CalmarRatioTest_MaxDrawdownPositive) {
+    std::vector<double> returns = {0.02, 0.03, 0.01, 0.05, 0.02};  // 正回报率示例
+    double calmar = calmar_ratio_from_simple_return(returns, "daily", 252);
+    EXPECT_TRUE(std::isnan(calmar));
+}
+
+TEST_F(StatsTest, CalmarRatioTest_MaxDrawdownZero) {
+    std::vector<double> returns = {0.01, 0.02, 0.0, 0.03, 0.02};  // 零回报率示例
+    double calmar = calmar_ratio_from_simple_return(returns, "daily");
+    EXPECT_TRUE(std::isnan(calmar));
+}
+
+TEST_F(StatsTest, CalmarRatioNetValuesTest_MaxDrawdownNegative) {
+    std::vector<double> net_values = {1000.0, 1100.0, 950.0, 1050.0, 900.0};  // 示例净值序列
+    double calmar = calmar_ratio_from_net_values(net_values, 252);  // 年化频率为252
+    EXPECT_FALSE(std::isnan(calmar));
+}
+
+TEST_F(StatsTest, CalmarRatioNetValuesTest_MaxDrawdownPositive) {
+    std::vector<double> net_values = {1000.0, 1050.0, 980.0, 1030.0, 1100.0};  // 示例净值序列
+    double calmar = calmar_ratio_from_net_values(net_values, 252);  // 年化频率为252
+    EXPECT_FALSE(std::isnan(calmar));
+}
+
+TEST_F(StatsTest, CalmarRatioNetValuesTest_MaxDrawdownZero) {
+    std::vector<double> net_values = {1000.0, 1020.0, 1030.0, 1040.0, 1050.0};  // 示例净值序列
+    double calmar = calmar_ratio_from_net_values(net_values, 252);  // 年化频率为252
+    EXPECT_TRUE(std::isnan(calmar));
+}
+
+// 测试计算 omega 的函数
+TEST_F(StatsTest, OmegaCalculatorTest_CalculatesOmegaCorrectly) {
+    std::vector<double> returns = {0.1, 0.2, 0.3, -0.1, -0.2, -0.3};
+    double omega = cal_omega_from_simple_return(returns);
+    EXPECT_DOUBLE_EQ(omega, 0.7777777777777779);  // 期望的结果
+}
+
+// 测试当 down 为零时的返回值
+TEST_F(StatsTest, OmegaCalculatorTest_ReturnsNaNWhenDownIsZero) {
+    std::vector<double> returns = {0.1, 0.2, 0.3, -0.1, -0.2, -0.3};
+    double omega = cal_omega_from_simple_return(returns, -1.0);  // 设置一个使 down 为零的 L 值
+    EXPECT_TRUE(std::isnan(omega));  // 期望返回 NaN
 }

@@ -5,6 +5,8 @@
 #include <numeric>
 #include "constants.h"
 #include "utils.h"
+#include <algorithm>
+#include <numeric>
 
 // 定义函数 adjust_returns
 std::vector<double> adjust_returns(const std::vector<double>& returns, const std::vector<double>& adjustment_factor) {
@@ -97,7 +99,7 @@ double max_drawdown_from_simple_return(const std::vector<double>& simple_returns
     double trough = returns[0]+1.0;  // 谷值设定为第一个元素
 
     for (size_t i = 1; i < returns.size(); ++i) {
-        if (returns[i] > peak) {
+        if (returns[i]+1.0 > peak) {
             peak = returns[i]+1.0;  // 更新峰值
             trough = peak;  // 重置谷值为峰值
         } else if (returns[i]+1.0 < trough) {
@@ -105,7 +107,7 @@ double max_drawdown_from_simple_return(const std::vector<double>& simple_returns
             double dd = (trough - peak) / peak;  // 计算回撤比例
             max_dd = std::min(max_dd, dd);  // 更新最大回撤
         }
-        // std::cout << "ret["<<i<<"]="<<returns[i] <<"peak = " << peak << "trough = " << trough << "max_dd = " << max_dd << std::endl;
+        std::cout << "ret["<<i<<"]="<<returns[i] <<" peak = " << peak << " trough = " << trough << " max_dd = " << max_dd << std::endl;
     }
 
     return max_dd;  // 返回负值表示最大回撤
@@ -143,14 +145,14 @@ double calculateSharpeRatio(std::vector<double>& returns,  double riskFreeRate) 
     }
 
     double sumReturn = std::accumulate(returns.begin(), returns.end(), 0.0);
-    double meanReturn = sumReturn / size;
+    double meanReturn = sumReturn / static_cast<double>(size);
 
     double sumSquareReturn = 0.0;
     for (double ret : returns) {
         double diff = ret - meanReturn;
         sumSquareReturn += diff * diff;
     }
-    double volatility = std::sqrt(sumSquareReturn / (size - 1));  // 标准差
+    double volatility = std::sqrt(sumSquareReturn / static_cast<double>((size - 1)));  // 标准差
 
     double sharpeRatio = (meanReturn - riskFreeRate) / volatility;
     return sharpeRatio;
@@ -166,7 +168,8 @@ double calculateAnnualizedSharpeRatio(std::vector<double>& returns, int numBarsP
 
 
 // 计算复利年化收益率
-double annual_return_from_simple_return(const std::vector<double>& returns, std::string & period,
+double annual_return_from_simple_return(const std::vector<double>& returns,
+                                        const std::string & period,
                                         std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()) {
     if (returns.empty()) {
         return std::numeric_limits<double>::quiet_NaN();
@@ -180,7 +183,7 @@ double annual_return_from_simple_return(const std::vector<double>& returns, std:
 }
 
 
-double annual_return_from_net_values(std::vector<double>& netValues,
+double annual_return_from_net_values(const std::vector<double>& netValues,
                                      std::size_t annualization) {
     std::size_t size = netValues.size();
     double totalReturn = netValues[size - 1] / netValues[0];
@@ -189,7 +192,7 @@ double annual_return_from_net_values(std::vector<double>& netValues,
 }
 
 // 计算年化波动率
-double annual_volatility(const std::vector<double>& returns,
+double annual_volatility_from_simple_return(const std::vector<double>& returns,
                          const std::string& period = "daily",
                          int d_dof = 0,
                          std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()) {
@@ -204,6 +207,70 @@ double annual_volatility(const std::vector<double>& returns,
     double annual_vol = std_dev * std::pow(ann_factor, 1.0 / 2.0);
 
     return annual_vol;
+}
+
+// the Calmar ratio
+double calmar_ratio_from_simple_return(const std::vector<double>& returns,
+                    const std::string& period = "daily",
+                    std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()) {
+    double max_dd = max_drawdown_from_simple_return(returns);
+    std::cout << "max_dd = " << max_dd << std::endl;
+    if (max_dd < 0) {
+        double temp = annual_return_from_simple_return(returns, period, annualization) / std::abs(max_dd);
+        if (std::isinf(temp) || std::isnan(temp)) {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        std::cout << "temp = " << temp << std::endl;
+        return temp;
+    } else {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double calmar_ratio_from_net_values(const std::vector<double>& net_values,
+                                    std::size_t annualization){
+    double max_dd = max_drawdown_from_net_values(net_values);
+    std::cout << "max_dd = " << max_dd << std::endl;
+    if (max_dd < 0) {
+        double temp = annual_return_from_net_values(net_values, annualization) / std::abs(max_dd);
+        if (std::isinf(temp) || std::isnan(temp)) {
+            return std::numeric_limits<double>::quiet_NaN();
+        }
+        std::cout << "temp = " << temp << std::endl;
+        return temp;
+    } else {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double cal_omega_from_simple_return(const std::vector<double>& returns,
+                                    double L = 0) {
+    std::vector<double> new_return(returns);
+    std::sort(new_return.begin(), new_return.end());
+    auto size = static_cast<double>(new_return.size());
+    double up = 0.0, down = 0.0;
+    for (size_t i = 1; i < new_return.size(); ++i) {
+        double x0 = new_return[i - 1], x1 = new_return[i];
+        double y0 = static_cast<double>(i - 1) / size;
+        double y1 = static_cast<double>(i) / size;
+        double width = x1 - x0;
+        double height = 0.5*(y0+y1);
+        if (x1 <= L) {
+            down += width*height;
+        } else if (x0 >= L) {
+            up += width * (1 - height);
+        } else {
+            down += (L - x0) * height;
+            up +=  (x1 - L)  * (1 - height);
+            break;  // No need to continue after crossing L
+        }
+    }
+
+    if (down == 0) {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+    return up / down;
 }
 
 

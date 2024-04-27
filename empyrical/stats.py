@@ -545,55 +545,55 @@ roll_annual_volatility = _create_unary_vectorized_roll_function(
 )
 
 
-def calmar_ratio(returns, period=DAILY, annualization=None):
-    """
-    Determines the Calmar ratio, or drawdown ratio, of a strategy.
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    period : str, optional
-        Defines the periodicity of the 'returns' data for purposes of
-        annualizing. Value ignored if `annualization` parameter is specified.
-        Defaults are::
-
-            'monthly':12
-            'weekly': 52
-            'daily': 252
-
-    annualization : int, optional
-        Used to suppress default values available in `period` to convert
-        returns into annual returns. Value should be the annual frequency of
-        `returns`.
-
-
-    Returns
-    -------
-    calmar_ratio : float
-        Calmar ratio (drawdown ratio) as float. Returns np.nan if there is no
-        calmar ratio.
-
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/Calmar_ratio for more details.
-    """
-
-    max_dd = max_drawdown(returns=returns)
-    if max_dd < 0:
-        temp = annual_return(
-            returns=returns,
-            period=period,
-            annualization=annualization
-        ) / abs(max_dd)
-    else:
-        return np.nan
-
-    if np.isinf(temp):
-        return np.nan
-
-    return temp
+# def calmar_ratio(returns, period=DAILY, annualization=None):
+#     """
+#     Determines the Calmar ratio, or drawdown ratio, of a strategy.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     period : str, optional
+#         Defines the periodicity of the 'returns' data for purposes of
+#         annualizing. Value ignored if `annualization` parameter is specified.
+#         Defaults are::
+#
+#             'monthly':12
+#             'weekly': 52
+#             'daily': 252
+#
+#     annualization : int, optional
+#         Used to suppress default values available in `period` to convert
+#         returns into annual returns. Value should be the annual frequency of
+#         `returns`.
+#
+#
+#     Returns
+#     -------
+#     calmar_ratio : float
+#         Calmar ratio (drawdown ratio) as float. Returns np.nan if there is no
+#         calmar ratio.
+#
+#     Note
+#     -----
+#     See https://en.wikipedia.org/wiki/Calmar_ratio for more details.
+#     """
+#
+#     max_dd = max_drawdown(returns=returns)
+#     if max_dd < 0:
+#         temp = annual_return(
+#             returns=returns,
+#             period=period,
+#             annualization=annualization
+#         ) / abs(max_dd)
+#     else:
+#         return np.nan
+#
+#     if np.isinf(temp):
+#         return np.nan
+#
+#     return temp
 
 
 def omega_ratio(returns, risk_free=0.0, required_return=0.0,
