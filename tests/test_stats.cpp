@@ -251,3 +251,72 @@ TEST_F(StatsTest, AnnualizedSharpeRatioTest_ZeroAnnualization) {
     double annualized_sharpe_ratio = calculate_annualized_sharpe_ratio(returns, annualization, risk_free_rate);
     EXPECT_EQ(std::isnan(annualized_sharpe_ratio), true);  // 期望为NaN
 }
+
+
+TEST_F(StatsTest, SortinoRatioTest_BasicSortinoRatio) {
+    std::vector<double> returns = {0.05, -0.02, 0.03, 0.08};
+    double riskFreeRate = 0.02;
+    std::size_t d_dof = 1;
+    double sortino_ratio = calculate_sortino_ratio(returns, riskFreeRate, d_dof);
+    EXPECT_GT(sortino_ratio, 0);  // Sortino ratio should be positive
+
+    // Add more specific tests based on your requirements
+}
+
+TEST_F(StatsTest, SortinoRatioTest_ZeroVolatility) {
+    std::vector<double> returns = {0.05, 0.05, 0.05, 0.05};  // All positive returns
+    double riskFreeRate = 0.02;
+    std::size_t d_dof = 1;
+    double sortino_ratio = calculate_sortino_ratio(returns, riskFreeRate, d_dof);
+    EXPECT_TRUE(std::isnan(sortino_ratio));  // Sortino ratio should be NaN when volatility is zero
+
+    // Add more specific tests based on your requirements
+}
+
+TEST_F(StatsTest, AnnualizedSortinoRatioTest_BasicAnnualizedSortinoRatio) {
+    std::vector<double> returns = {0.05, -0.02, 0.03, 0.08};
+    double riskFreeRate = 0.02;
+    int annualization = 252;  // Example annualization
+    double annualized_sortino_ratio = calculate_annualized_sortino_ratio(returns, annualization, riskFreeRate);
+    EXPECT_GT(annualized_sortino_ratio, 0);  // Annualized Sortino ratio should be positive
+
+    // Add more specific tests based on your requirements
+}
+
+TEST_F(StatsTest, AnnualizedSortinoRatioTest_InvalidAnnualization) {
+    std::vector<double> returns = {0.05, -0.02, 0.03, 0.08};
+    double riskFreeRate = 0.02;
+    int annualization = 0;  // Invalid annualization
+    double annualized_sortino_ratio = calculate_annualized_sortino_ratio(returns, annualization, riskFreeRate);
+    EXPECT_TRUE(std::isnan(annualized_sortino_ratio));  // Annualized Sortino ratio should be NaN for invalid annualization
+
+    // Add more specific tests based on your requirements
+}
+
+
+TEST_F(StatsTest, ExcessSharpeRatioTest_BasicExcessSharpeRatio) {
+    // Sample data
+    std::vector<double> returns = {0.05, 0.02, -0.03, 0.08};
+    std::vector<double> factor_returns = {0.03, 0.01, -0.02, 0.06};
+    std::size_t d_dof = 1;
+
+    double excess_sharpe_ratio = calculate_excess_sharpe_ratio(returns, factor_returns, d_dof);
+
+    // Add specific expectations based on your calculations
+    EXPECT_GT(excess_sharpe_ratio, 0);  // Excess Sharpe Ratio should be positive
+
+    // Add more specific tests based on your requirements
+}
+
+TEST_F(StatsTest, ExcessSharpeRatioTest_ZeroTrackingError) {
+    // Sample data where tracking error is zero
+    std::vector<double> returns = {0.05, 0.02, -0.03, 0.08};
+    std::vector<double> factor_returns = {0.05, 0.02, -0.03, 0.08};
+    std::size_t d_dof = 1;
+
+    double excess_sharpe_ratio = calculate_excess_sharpe_ratio(returns, factor_returns, d_dof);
+
+    EXPECT_TRUE(std::isnan(excess_sharpe_ratio));  // Excess Sharpe Ratio should be NaN for zero tracking error
+
+    // Add more specific tests based on your requirements
+}

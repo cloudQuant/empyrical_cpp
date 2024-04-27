@@ -274,6 +274,69 @@ double calculate_annualized_sharpe_ratio(std::vector<double>& returns, int annua
 
 }
 
+double calculate_sortino_ratio(std::vector<double>& returns,
+                              double riskFreeRate,
+                              std::size_t d_dof=1) {
+    std::size_t size = returns.size();
+    if (size <= 1) {
+        std::cerr << "Error: Returns vector should have at least two elements." << std::endl;
+        return 0.0;
+    }
+
+    double sumReturn = std::accumulate(returns.begin(), returns.end(), 0.0);
+    double meanReturn = sumReturn / static_cast<double>(size);
+
+    double sumSquareReturn = 0.0;
+    for (double ret : returns) {
+        double diff = ret - meanReturn;
+        if (diff < 0){
+            sumSquareReturn += diff * diff;
+        }
+
+    }
+    double volatility = std::sqrt(sumSquareReturn / static_cast<double>((size - d_dof)));  // 标准差
+    if (volatility > 0){
+        double sharpeRatio = (meanReturn - riskFreeRate/APPROX_BDAYS_PER_YEAR) / volatility;
+        return sharpeRatio;
+    } else{
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+}
+
+double calculate_annualized_sortino_ratio(std::vector<double>& returns, int annualization, double riskFreeRate = 0.0) {
+    if (annualization>0){
+        double sharpe_ratio = calculate_sortino_ratio(returns, riskFreeRate);
+        double annualized_sortino_ratio = sharpe_ratio * std::sqrt(annualization);
+        return annualized_sortino_ratio;
+    } else{
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+}
+
+/*
+ * The excess Sharpe is a simplified Information Ratio that uses
+    tracking error rather than "active risk" as the denominator.
+ */
+double calculate_excess_sharpe_ratio(std::vector<double>& returns,
+                                     std::vector<double>& factor_returns,
+                                     std::size_t d_dof = 1
+                                     ){
+    std::size_t length = returns.size();
+    std::vector<double> active_returns(length, 0);
+    for (std::size_t i=0;i<length;i++){
+        active_returns[i] = returns[i] - factor_returns[i];
+    }
+    double average_return = cal_func::nan_mean(active_returns);
+    double tracking_error = cal_func::nan_std(active_returns,d_dof);
+    if (tracking_error > 0){
+        return average_return/tracking_error;
+    }else{
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+}
+
 
 
 #endif // EMPYRICAL_CPP_STATS

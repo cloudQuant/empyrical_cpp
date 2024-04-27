@@ -649,356 +649,356 @@ roll_annual_volatility = _create_unary_vectorized_roll_function(
 #         return np.nan
 
 
-def sharpe_ratio(returns,
-                 risk_free=0,
-                 period=DAILY,
-                 annualization=None,
-                 out=None):
-    """
-    Determines the Sharpe ratio of a strategy.
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    risk_free : int, float
-        Constant daily risk-free return throughout the period.
-    period : str, optional
-        Defines the periodicity of the 'returns' data for purposes of
-        annualizing. Value ignored if `annualization` parameter is specified.
-        Defaults are::
-
-            'monthly':12
-            'weekly': 52
-            'daily': 252
-
-    annualization : int, optional
-        Used to suppress default values available in `period` to convert
-        returns into annual returns. Value should be the annual frequency of
-        `returns`.
-    out : array-like, optional
-        Array to use as output buffer.
-        If not passed, a new array will be created.
-
-    Returns
-    -------
-    sharpe_ratio : float
-        nan if insufficient length of returns or if if adjusted returns are 0.
-
-    Note
-    -----
-    See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
-
-    """
-    allocated_output = out is None
-    if allocated_output:
-        out = np.empty(returns.shape[1:])
-
-    return_1d = returns.ndim == 1
-
-    if len(returns) < 2:
-        out[()] = np.nan
-        if return_1d:
-            out = out.item()
-        return out
-
-    returns_risk_adj = np.asanyarray(_adjust_returns(returns, risk_free))
-    ann_factor = annualization_factor(period, annualization)
-
-    np.multiply(
-        np.divide(
-            nanmean(returns_risk_adj, axis=0),
-            nanstd(returns_risk_adj, ddof=1, axis=0),
-            out=out,
-        ),
-        np.sqrt(ann_factor),
-        out=out,
-    )
-    if return_1d:
-        out = out.item()
-
-    return out
+# def sharpe_ratio(returns,
+#                  risk_free=0,
+#                  period=DAILY,
+#                  annualization=None,
+#                  out=None):
+#     """
+#     Determines the Sharpe ratio of a strategy.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     risk_free : int, float
+#         Constant daily risk-free return throughout the period.
+#     period : str, optional
+#         Defines the periodicity of the 'returns' data for purposes of
+#         annualizing. Value ignored if `annualization` parameter is specified.
+#         Defaults are::
+#
+#             'monthly':12
+#             'weekly': 52
+#             'daily': 252
+#
+#     annualization : int, optional
+#         Used to suppress default values available in `period` to convert
+#         returns into annual returns. Value should be the annual frequency of
+#         `returns`.
+#     out : array-like, optional
+#         Array to use as output buffer.
+#         If not passed, a new array will be created.
+#
+#     Returns
+#     -------
+#     sharpe_ratio : float
+#         nan if insufficient length of returns or if if adjusted returns are 0.
+#
+#     Note
+#     -----
+#     See https://en.wikipedia.org/wiki/Sharpe_ratio for more details.
+#
+#     """
+#     allocated_output = out is None
+#     if allocated_output:
+#         out = np.empty(returns.shape[1:])
+#
+#     return_1d = returns.ndim == 1
+#
+#     if len(returns) < 2:
+#         out[()] = np.nan
+#         if return_1d:
+#             out = out.item()
+#         return out
+#
+#     returns_risk_adj = np.asanyarray(_adjust_returns(returns, risk_free))
+#     ann_factor = annualization_factor(period, annualization)
+#
+#     np.multiply(
+#         np.divide(
+#             nanmean(returns_risk_adj, axis=0),
+#             nanstd(returns_risk_adj, ddof=1, axis=0),
+#             out=out,
+#         ),
+#         np.sqrt(ann_factor),
+#         out=out,
+#     )
+#     if return_1d:
+#         out = out.item()
+#
+#     return out
 
 
 roll_sharpe_ratio = _create_unary_vectorized_roll_function(sharpe_ratio)
 
 
-def sortino_ratio(returns,
-                  required_return=0,
-                  period=DAILY,
-                  annualization=None,
-                  out=None,
-                  _downside_risk=None):
-    """
-    Determines the Sortino ratio of a strategy.
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray or pd.DataFrame
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    required_return: float / series
-        minimum acceptable return
-    period : str, optional
-        Defines the periodicity of the 'returns' data for purposes of
-        annualizing. Value ignored if `annualization` parameter is specified.
-        Defaults are::
-
-            'monthly':12
-            'weekly': 52
-            'daily': 252
-
-    annualization : int, optional
-        Used to suppress default values available in `period` to convert
-        returns into annual returns. Value should be the annual frequency of
-        `returns`.
-    _downside_risk : float, optional
-        The downside risk of the given inputs, if known. Will be calculated if
-        not provided.
-    out : array-like, optional
-        Array to use as output buffer.
-        If not passed, a new array will be created.
-
-    Returns
-    -------
-    sortino_ratio : float or pd.Series
-
-        depends on input type
-        series ==> float
-        DataFrame ==> pd.Series
-
-    Note
-    -----
-    See `<https://www.sunrisecapital.com/wp-content/uploads/2014/06/Futures_
-    Mag_Sortino_0213.pdf>`__ for more details.
-
-    """
-    allocated_output = out is None
-    if allocated_output:
-        out = np.empty(returns.shape[1:])
-
-    return_1d = returns.ndim == 1
-
-    if len(returns) < 2:
-        out[()] = np.nan
-        if return_1d:
-            out = out.item()
-        return out
-
-    adj_returns = np.asanyarray(_adjust_returns(returns, required_return))
-
-    ann_factor = annualization_factor(period, annualization)
-
-    average_annual_return = nanmean(adj_returns, axis=0) * ann_factor
-    annualized_downside_risk = (
-        _downside_risk
-        if _downside_risk is not None else
-        downside_risk(returns, required_return, period, annualization)
-    )
-    np.divide(average_annual_return, annualized_downside_risk, out=out)
-    if return_1d:
-        out = out.item()
-    elif isinstance(returns, pd.DataFrame):
-        out = pd.Series(out)
-
-    return out
+# def sortino_ratio(returns,
+#                   required_return=0,
+#                   period=DAILY,
+#                   annualization=None,
+#                   out=None,
+#                   _downside_risk=None):
+#     """
+#     Determines the Sortino ratio of a strategy.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray or pd.DataFrame
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     required_return: float / series
+#         minimum acceptable return
+#     period : str, optional
+#         Defines the periodicity of the 'returns' data for purposes of
+#         annualizing. Value ignored if `annualization` parameter is specified.
+#         Defaults are::
+#
+#             'monthly':12
+#             'weekly': 52
+#             'daily': 252
+#
+#     annualization : int, optional
+#         Used to suppress default values available in `period` to convert
+#         returns into annual returns. Value should be the annual frequency of
+#         `returns`.
+#     _downside_risk : float, optional
+#         The downside risk of the given inputs, if known. Will be calculated if
+#         not provided.
+#     out : array-like, optional
+#         Array to use as output buffer.
+#         If not passed, a new array will be created.
+#
+#     Returns
+#     -------
+#     sortino_ratio : float or pd.Series
+#
+#         depends on input type
+#         series ==> float
+#         DataFrame ==> pd.Series
+#
+#     Note
+#     -----
+#     See `<https://www.sunrisecapital.com/wp-content/uploads/2014/06/Futures_
+#     Mag_Sortino_0213.pdf>`__ for more details.
+#
+#     """
+#     allocated_output = out is None
+#     if allocated_output:
+#         out = np.empty(returns.shape[1:])
+#
+#     return_1d = returns.ndim == 1
+#
+#     if len(returns) < 2:
+#         out[()] = np.nan
+#         if return_1d:
+#             out = out.item()
+#         return out
+#
+#     adj_returns = np.asanyarray(_adjust_returns(returns, required_return))
+#
+#     ann_factor = annualization_factor(period, annualization)
+#
+#     average_annual_return = nanmean(adj_returns, axis=0) * ann_factor
+#     annualized_downside_risk = (
+#         _downside_risk
+#         if _downside_risk is not None else
+#         downside_risk(returns, required_return, period, annualization)
+#     )
+#     np.divide(average_annual_return, annualized_downside_risk, out=out)
+#     if return_1d:
+#         out = out.item()
+#     elif isinstance(returns, pd.DataFrame):
+#         out = pd.Series(out)
+#
+#     return out
 
 
 roll_sortino_ratio = _create_unary_vectorized_roll_function(sortino_ratio)
 
 
-def downside_risk(returns,
-                  required_return=0,
-                  period=DAILY,
-                  annualization=None,
-                  out=None):
-    """
-    Determines the downside deviation below a threshold
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray or pd.DataFrame
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    required_return: float / series
-        minimum acceptable return
-    period : str, optional
-        Defines the periodicity of the 'returns' data for purposes of
-        annualizing. Value ignored if `annualization` parameter is specified.
-        Defaults are::
-
-            'monthly':12
-            'weekly': 52
-            'daily': 252
-
-    annualization : int, optional
-        Used to suppress default values available in `period` to convert
-        returns into annual returns. Value should be the annual frequency of
-        `returns`.
-    out : array-like, optional
-        Array to use as output buffer.
-        If not passed, a new array will be created.
-
-    Returns
-    -------
-    downside_deviation : float or pd.Series
-        depends on input type
-        series ==> float
-        DataFrame ==> pd.Series
-
-    Note
-    -----
-    See `<https://www.sunrisecapital.com/wp-content/uploads/2014/06/Futures_
-    Mag_Sortino_0213.pdf>`__ for more details, specifically why using the
-    standard deviation of the negative returns is not correct.
-    """
-    allocated_output = out is None
-    if allocated_output:
-        out = np.empty(returns.shape[1:])
-
-    returns_1d = returns.ndim == 1
-
-    if len(returns) < 1:
-        out[()] = np.nan
-        if returns_1d:
-            out = out.item()
-        return out
-
-    ann_factor = annualization_factor(period, annualization)
-
-    downside_diff = np.clip(
-        _adjust_returns(
-            np.asanyarray(returns),
-            np.asanyarray(required_return),
-        ),
-        np.NINF,
-        0,
-    )
-
-    np.square(downside_diff, out=downside_diff)
-    nanmean(downside_diff, axis=0, out=out)
-    np.sqrt(out, out=out)
-    np.multiply(out, np.sqrt(ann_factor), out=out)
-
-    if returns_1d:
-        out = out.item()
-    elif isinstance(returns, pd.DataFrame):
-        out = pd.Series(out, index=returns.columns)
-    return out
+# def downside_risk(returns,
+#                   required_return=0,
+#                   period=DAILY,
+#                   annualization=None,
+#                   out=None):
+#     """
+#     Determines the downside deviation below a threshold
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray or pd.DataFrame
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     required_return: float / series
+#         minimum acceptable return
+#     period : str, optional
+#         Defines the periodicity of the 'returns' data for purposes of
+#         annualizing. Value ignored if `annualization` parameter is specified.
+#         Defaults are::
+#
+#             'monthly':12
+#             'weekly': 52
+#             'daily': 252
+#
+#     annualization : int, optional
+#         Used to suppress default values available in `period` to convert
+#         returns into annual returns. Value should be the annual frequency of
+#         `returns`.
+#     out : array-like, optional
+#         Array to use as output buffer.
+#         If not passed, a new array will be created.
+#
+#     Returns
+#     -------
+#     downside_deviation : float or pd.Series
+#         depends on input type
+#         series ==> float
+#         DataFrame ==> pd.Series
+#
+#     Note
+#     -----
+#     See `<https://www.sunrisecapital.com/wp-content/uploads/2014/06/Futures_
+#     Mag_Sortino_0213.pdf>`__ for more details, specifically why using the
+#     standard deviation of the negative returns is not correct.
+#     """
+#     allocated_output = out is None
+#     if allocated_output:
+#         out = np.empty(returns.shape[1:])
+#
+#     returns_1d = returns.ndim == 1
+#
+#     if len(returns) < 1:
+#         out[()] = np.nan
+#         if returns_1d:
+#             out = out.item()
+#         return out
+#
+#     ann_factor = annualization_factor(period, annualization)
+#
+#     downside_diff = np.clip(
+#         _adjust_returns(
+#             np.asanyarray(returns),
+#             np.asanyarray(required_return),
+#         ),
+#         np.NINF,
+#         0,
+#     )
+#
+#     np.square(downside_diff, out=downside_diff)
+#     nanmean(downside_diff, axis=0, out=out)
+#     np.sqrt(out, out=out)
+#     np.multiply(out, np.sqrt(ann_factor), out=out)
+#
+#     if returns_1d:
+#         out = out.item()
+#     elif isinstance(returns, pd.DataFrame):
+#         out = pd.Series(out, index=returns.columns)
+#     return out
 
 
 roll_downsize_risk = _create_unary_vectorized_roll_function(downside_risk)
 
 
-def excess_sharpe(returns, factor_returns, out=None):
-    """
-    Determines the Excess Sharpe of a strategy.
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    factor_returns: float / series
-        Benchmark return to compare returns against.
-    out : array-like, optional
-        Array to use as output buffer.
-        If not passed, a new array will be created.
-
-    Returns
-    -------
-    excess_sharpe : float
-
-    Note
-    -----
-    The excess Sharpe is a simplified Information Ratio that uses
-    tracking error rather than "active risk" as the denominator.
-    """
-    allocated_output = out is None
-    if allocated_output:
-        out = np.empty(returns.shape[1:])
-
-    returns_1d = returns.ndim == 1
-
-    if len(returns) < 2:
-        out[()] = np.nan
-        if returns_1d:
-            out = out.item()
-        return out
-
-    active_return = _adjust_returns(returns, factor_returns)
-    tracking_error = np.nan_to_num(nanstd(active_return, ddof=1, axis=0))
-
-    out = np.divide(
-        nanmean(active_return, axis=0, out=out),
-        tracking_error,
-        out=out,
-    )
-    if returns_1d:
-        out = out.item()
-    return out
+# def excess_sharpe(returns, factor_returns, out=None):
+#     """
+#     Determines the Excess Sharpe of a strategy.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     factor_returns: float / series
+#         Benchmark return to compare returns against.
+#     out : array-like, optional
+#         Array to use as output buffer.
+#         If not passed, a new array will be created.
+#
+#     Returns
+#     -------
+#     excess_sharpe : float
+#
+#     Note
+#     -----
+#     The excess Sharpe is a simplified Information Ratio that uses
+#     tracking error rather than "active risk" as the denominator.
+#     """
+#     allocated_output = out is None
+#     if allocated_output:
+#         out = np.empty(returns.shape[1:])
+#
+#     returns_1d = returns.ndim == 1
+#
+#     if len(returns) < 2:
+#         out[()] = np.nan
+#         if returns_1d:
+#             out = out.item()
+#         return out
+#
+#     active_return = _adjust_returns(returns, factor_returns)
+#     tracking_error = np.nan_to_num(nanstd(active_return, ddof=1, axis=0))
+#
+#     out = np.divide(
+#         nanmean(active_return, axis=0, out=out),
+#         tracking_error,
+#         out=out,
+#     )
+#     if returns_1d:
+#         out = out.item()
+#     return out
 
 
 roll_excess_sharpe = _create_binary_vectorized_roll_function(excess_sharpe)
 
 
-def _to_pandas(ob):
-    """Convert an array-like to a pandas object.
+# def _to_pandas(ob):
+#     """Convert an array-like to a pandas object.
+#
+#     Parameters
+#     ----------
+#     ob : array-like
+#         The object to convert.
+#
+#     Returns
+#     -------
+#     pandas_structure : pd.Series or pd.DataFrame
+#         The correct structure based on the dimensionality of the data.
+#     """
+#     if isinstance(ob, (pd.Series, pd.DataFrame)):
+#         return ob
+#
+#     if ob.ndim == 1:
+#         return pd.Series(ob)
+#     elif ob.ndim == 2:
+#         return pd.DataFrame(ob)
+#     else:
+#         raise ValueError(
+#             'cannot convert array of dim > 2 to a pandas structure',
+#         )
 
-    Parameters
-    ----------
-    ob : array-like
-        The object to convert.
 
-    Returns
-    -------
-    pandas_structure : pd.Series or pd.DataFrame
-        The correct structure based on the dimensionality of the data.
-    """
-    if isinstance(ob, (pd.Series, pd.DataFrame)):
-        return ob
-
-    if ob.ndim == 1:
-        return pd.Series(ob)
-    elif ob.ndim == 2:
-        return pd.DataFrame(ob)
-    else:
-        raise ValueError(
-            'cannot convert array of dim > 2 to a pandas structure',
-        )
-
-
-def _aligned_series(*many_series):
-    """
-    Return a new list of series containing the data in the input series, but
-    with their indices aligned. NaNs will be filled in for missing values.
-
-    Parameters
-    ----------
-    *many_series
-        The series to align.
-
-    Returns
-    -------
-    aligned_series : iterable[array-like]
-        A new list of series containing the data in the input series, but
-        with their indices aligned. NaNs will be filled in for missing values.
-
-    """
-    head = many_series[0]
-    tail = many_series[1:]
-    n = len(head)
-    if (isinstance(head, np.ndarray) and
-            all(len(s) == n and isinstance(s, np.ndarray) for s in tail)):
-        # optimization: ndarrays of the same length are already aligned
-        return many_series
-
-    # dataframe has no ``itervalues``
-    return (
-        v
-        for _, v in iteritems(pd.concat(map(_to_pandas, many_series), axis=1))
-    )
+# def _aligned_series(*many_series):
+#     """
+#     Return a new list of series containing the data in the input series, but
+#     with their indices aligned. NaNs will be filled in for missing values.
+#
+#     Parameters
+#     ----------
+#     *many_series
+#         The series to align.
+#
+#     Returns
+#     -------
+#     aligned_series : iterable[array-like]
+#         A new list of series containing the data in the input series, but
+#         with their indices aligned. NaNs will be filled in for missing values.
+#
+#     """
+#     head = many_series[0]
+#     tail = many_series[1:]
+#     n = len(head)
+#     if (isinstance(head, np.ndarray) and
+#             all(len(s) == n and isinstance(s, np.ndarray) for s in tail)):
+#         # optimization: ndarrays of the same length are already aligned
+#         return many_series
+#
+#     # dataframe has no ``itervalues``
+#     return (
+#         v
+#         for _, v in iteritems(pd.concat(map(_to_pandas, many_series), axis=1))
+#     )
 
 
 def alpha_beta(returns,

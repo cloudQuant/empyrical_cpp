@@ -475,17 +475,17 @@ namespace cal_func{
         return count > 0 ? sum / count : std::numeric_limits<double>::quiet_NaN();
     }
 
-    inline double nan_std(const std::vector<double>& arr, int d_dof=0) {
+    inline double nan_std(const std::vector<double>& arr, std::size_t d_dof=0) {
         double mean = nan_mean(arr);
         double sum = 0.0;
-        int count = 0;
+        std::size_t count = 0;
         for (const auto& num : arr) {
             if (!std::isnan(num)) {
                 sum += (num - mean) * (num - mean);
                 ++count;
             }
         }
-        return count > 1 ? std::sqrt(sum / (count - d_dof)) : std::numeric_limits<double>::quiet_NaN();
+        return count > 1 ? std::sqrt(sum / static_cast<double>(count - d_dof)) : std::numeric_limits<double>::quiet_NaN();
     }
 
     inline double nan_sum(const std::vector<double>& arr) {
