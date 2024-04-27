@@ -221,3 +221,33 @@ TEST_F(StatsTest, OmegaCalculatorTest_ReturnsNaNWhenDownIsZero) {
     double omega = cal_omega_from_simple_return(returns, -1.0);  // 设置一个使 down 为零的 L 值
     EXPECT_TRUE(std::isnan(omega));  // 期望返回 NaN
 }
+
+TEST_F(StatsTest, SharpeRatioTest_ValidInput) {
+    std::vector<double> returns = {0.1, 0.05, -0.02, 0.03, 0.08};  // 示例收益率序列
+    double risk_free_rate = 0.02;  // 无风险利率
+    double sharpe_ratio = calculate_sharpe_ratio(returns, risk_free_rate);
+    EXPECT_NEAR(sharpe_ratio, 1.028709, 1e-5);  // 预期值
+}
+
+TEST_F(StatsTest, SharpeRatioTest_EmptyInput) {
+    std::vector<double> returns;  // 空收益率序列
+    double risk_free_rate = 0.02;  // 无风险利率
+    double sharpe_ratio = calculate_sharpe_ratio(returns, risk_free_rate);
+    EXPECT_EQ(sharpe_ratio, 0.0);  // 期望为0.0
+}
+
+TEST_F(StatsTest, AnnualizedSharpeRatioTest_ValidInput) {
+    std::vector<double> returns = {0.1, 0.05, -0.02, 0.03, 0.08};  // 示例收益率序列
+    int annualization = 252;  // 年化频率
+    double risk_free_rate = 0.02;  // 无风险利率
+    double annualized_sharpe_ratio = calculate_annualized_sharpe_ratio(returns, annualization, risk_free_rate);
+    EXPECT_NEAR(annualized_sharpe_ratio, 16.330255, 1e-3);  // 预期值
+}
+
+TEST_F(StatsTest, AnnualizedSharpeRatioTest_ZeroAnnualization) {
+    std::vector<double> returns = {0.1, 0.05, -0.02, 0.03, 0.08};  // 示例收益率序列
+    int annualization = 0;  // 年化频率为0，无法计算
+    double risk_free_rate = 0.02;  // 无风险利率
+    double annualized_sharpe_ratio = calculate_annualized_sharpe_ratio(returns, annualization, risk_free_rate);
+    EXPECT_EQ(std::isnan(annualized_sharpe_ratio), true);  // 期望为NaN
+}

@@ -132,41 +132,6 @@ double max_drawdown_from_net_values(const std::vector<double>& net_values) {
     return max_dd;  // 返回负值表示最大回撤
 }
 
-
-
-
-
-// 计算夏普比率
-double calculateSharpeRatio(std::vector<double>& returns,  double riskFreeRate) {
-    std::size_t size = returns.size();
-    if (size <= 1) {
-        std::cerr << "Error: Returns vector should have at least two elements." << std::endl;
-        return 0.0;
-    }
-
-    double sumReturn = std::accumulate(returns.begin(), returns.end(), 0.0);
-    double meanReturn = sumReturn / static_cast<double>(size);
-
-    double sumSquareReturn = 0.0;
-    for (double ret : returns) {
-        double diff = ret - meanReturn;
-        sumSquareReturn += diff * diff;
-    }
-    double volatility = std::sqrt(sumSquareReturn / static_cast<double>((size - 1)));  // 标准差
-
-    double sharpeRatio = (meanReturn - riskFreeRate) / volatility;
-    return sharpeRatio;
-}
-
-// 计算年化夏普率
-double calculateAnnualizedSharpeRatio(std::vector<double>& returns, int numBarsPerYear, double riskFreeRate = 0.0) {
-    double sharpeRatio = calculateSharpeRatio(returns, riskFreeRate);
-    double annualizedSharpeRatio = sharpeRatio * std::sqrt(numBarsPerYear);
-    return annualizedSharpeRatio;
-}
-
-
-
 // 计算复利年化收益率
 double annual_return_from_simple_return(const std::vector<double>& returns,
                                         const std::string & period,
@@ -271,6 +236,42 @@ double cal_omega_from_simple_return(const std::vector<double>& returns,
     }
 
     return up / down;
+}
+
+// 计算夏普比率
+double calculate_sharpe_ratio(std::vector<double>& returns,
+                              double riskFreeRate,
+                              std::size_t d_dof=1) {
+    std::size_t size = returns.size();
+    if (size <= 1) {
+        std::cerr << "Error: Returns vector should have at least two elements." << std::endl;
+        return 0.0;
+    }
+
+    double sumReturn = std::accumulate(returns.begin(), returns.end(), 0.0);
+    double meanReturn = sumReturn / static_cast<double>(size);
+
+    double sumSquareReturn = 0.0;
+    for (double ret : returns) {
+        double diff = ret - meanReturn;
+        sumSquareReturn += diff * diff;
+    }
+    double volatility = std::sqrt(sumSquareReturn / static_cast<double>((size - d_dof)));  // 标准差
+
+    double sharpeRatio = (meanReturn - riskFreeRate/APPROX_BDAYS_PER_YEAR) / volatility;
+    return sharpeRatio;
+}
+
+// 计算年化夏普率
+double calculate_annualized_sharpe_ratio(std::vector<double>& returns, int annualization, double riskFreeRate = 0.0) {
+    if (annualization>0){
+        double sharpe_ratio = calculate_sharpe_ratio(returns, riskFreeRate);
+        double annualized_sharpe_ratio = sharpe_ratio * std::sqrt(annualization);
+        return annualized_sharpe_ratio;
+    } else{
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
 }
 
 
