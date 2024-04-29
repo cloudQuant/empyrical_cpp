@@ -337,6 +337,96 @@ double calculate_excess_sharpe_ratio(std::vector<double>& returns,
     }
 }
 
+double stability_of_timeseries(const std::vector<double>& returns) {
+    if (returns.size() < 2) {
+        return std::nan("");
+    }
 
+    std::vector<double> cum_log_returns(returns.size());
+    double cum_sum = 0.0;
+    for (size_t i = 0; i < returns.size(); ++i) {
+        cum_sum += std::log1p(returns[i]);
+        cum_log_returns[i] = cum_sum;
+    }
+
+    auto n = static_cast<double>(returns.size());
+    double sum_x = n * (n - 1) * 0.5; // Sum of 1, 2, 3, ..., n-1
+    double sum_x_sq = n * (n - 1) * (2 * n - 1) / 6.0; // Sum of squares of 1, 2, 3, ..., n-1
+    double sum_y = std::accumulate(cum_log_returns.begin(), cum_log_returns.end(), 0.0);
+    double sum_xy = 0.0;
+    for (size_t i = 0; i < returns.size(); ++i) {
+        sum_xy += (static_cast<double>(i) * cum_log_returns[i]);
+    }
+
+    double slope = (n * sum_xy - sum_x * sum_y) / (n * sum_x_sq - sum_x * sum_x);
+    double intercept = (sum_y - slope * sum_x) / n;
+
+    double ssr = 0.0; // Regression sum of squares
+    double sst = 0.0; // Total sum of squares
+    for (size_t i = 0; i < returns.size(); ++i) {
+        double y_hat = slope * static_cast<double>(i) + intercept;
+        ssr += (y_hat - cum_log_returns[i]) * (y_hat - cum_log_returns[i]);
+        sst += (cum_log_returns[i] - (sum_y / n)) * (cum_log_returns[i] - (sum_y / n));
+    }
+
+    double r_squared = 1.0 - (ssr / sst);
+    return r_squared;
+}
+
+
+double percentile(const std::vector<double>& arr,
+                  double q,
+                  Interpolation interpolation=Interpolation::Linear) {
+    assert(!arr.empty());
+    assert(q >= 0.0 && q <= 1.0);
+
+    std::vector<double> sorted_arr = arr;
+    std::sort(sorted_arr.begin(), sorted_arr.end());
+
+    auto n = static_cast<double>(sorted_arr.size());
+    double pos = (n - 1.0) * q ;
+
+    int k = static_cast<int>(std::floor(pos));
+    double d = pos - k;
+    std::cout << "q = " << q << " k = "<< k << " d = "<< d << std::endl;
+    switch (interpolation) {
+        case Interpolation::Linear:
+            if (d==0.0) {
+                return sorted_arr[k];
+            } else {
+                return sorted_arr[k] + d * (sorted_arr[k + 1] - sorted_arr[k]);
+            }
+        case Interpolation::Lower:
+            return sorted_arr[k];
+        case Interpolation::Higher:
+            return sorted_arr[k + 1];
+        case Interpolation::Midpoint:
+            return (sorted_arr[k] + sorted_arr[k + 1]) / 2.0;
+        case Interpolation::Nearest:
+            if (d < 0.5) {
+                return sorted_arr[k];
+            } else {
+                return sorted_arr[k + 1];
+            }
+        default:
+            return std::numeric_limits<double>::quiet_NaN();
+    }
+}
+
+double tail_ratio(const std::vector<double>& returns) {
+    if (returns.empty()) {
+        return std::nan("");
+    }
+
+
+    double right_tail = percentile(returns, 0.95);
+    double left_tail = percentile(returns, 0.05);
+
+    if (left_tail == 0.0) {
+        return std::numeric_limits<double>::infinity();
+    }
+
+    return std::abs(right_tail) / std::abs(left_tail);
+}
 
 #endif // EMPYRICAL_CPP_STATS

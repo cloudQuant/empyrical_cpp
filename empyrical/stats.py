@@ -1468,34 +1468,34 @@ def beta_aligned(returns, factor_returns, risk_free=0.0, out=None):
 roll_beta_aligned = _create_binary_vectorized_roll_function(beta_aligned)
 
 
-def stability_of_timeseries(returns):
-    """Determines R-squared of a linear fit to the cumulative
-    log returns. Computes an ordinary least squares linear fit,
-    and returns R-squared.
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-
-    Returns
-    -------
-    float
-        R-squared.
-
-    """
-    if len(returns) < 2:
-        return np.nan
-
-    returns = np.asanyarray(returns)
-    returns = returns[~np.isnan(returns)]
-
-    cum_log_returns = np.log1p(returns).cumsum()
-    rhat = stats.linregress(np.arange(len(cum_log_returns)),
-                            cum_log_returns)[2]
-
-    return rhat ** 2
+# def stability_of_timeseries(returns):
+#     """Determines R-squared of a linear fit to the cumulative
+#     log returns. Computes an ordinary least squares linear fit,
+#     and returns R-squared.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#
+#     Returns
+#     -------
+#     float
+#         R-squared.
+#
+#     """
+#     if len(returns) < 2:
+#         return np.nan
+#
+#     returns = np.asanyarray(returns)
+#     returns = returns[~np.isnan(returns)]
+#
+#     cum_log_returns = np.log1p(returns).cumsum()
+#     rhat = stats.linregress(np.arange(len(cum_log_returns)),
+#                             cum_log_returns)[2]
+#
+#     return rhat ** 2
 
 
 def tail_ratio(returns):

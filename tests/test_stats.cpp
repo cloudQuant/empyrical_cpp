@@ -320,3 +320,53 @@ TEST_F(StatsTest, ExcessSharpeRatioTest_ZeroTrackingError) {
 
     // Add more specific tests based on your requirements
 }
+
+TEST_F(StatsTest, StabilityOfTimeSeriesTest_RSquaredCalculation) {
+    // Test case 1: Empty returns
+    std::vector<double> empty_returns;
+    EXPECT_TRUE(std::isnan(stability_of_timeseries(empty_returns)));
+}
+TEST_F(StatsTest, StabilityOfTimeSeriesTest_RSquaredCalculation2) {
+    // Test case 2: Single return value
+    std::vector<double> single_return = {0.05};  // Example return value
+    EXPECT_TRUE(std::isnan(stability_of_timeseries(single_return)));
+}
+
+TEST_F(StatsTest, StabilityOfTimeSeriesTest_RSquaredCalculation3) {
+    // Test case 2: Single return value
+    std::vector<double> returns = {0.01, 0.02, -0.015, 0.03, -0.02};  // Example return values
+    double expected_r_squared = 0.24962472;  // Example expected R-squared value
+    double tolerance = 1e-4;  // Tolerance for floating-point comparison
+    double actual_r_squared = stability_of_timeseries(returns);
+    EXPECT_NEAR(actual_r_squared, expected_r_squared, tolerance);
+}
+
+TEST_F(StatsTest, PercentileTest_NormalCases) {
+    std::vector<double> arr = {1.0, 2.0, 3.0, 4.0, 5.0};
+    ASSERT_DOUBLE_EQ(percentile(arr, 0.25, Interpolation::Linear), 2.0);
+    ASSERT_DOUBLE_EQ(percentile(arr, 0.5, Interpolation::Lower), 3.0);
+    ASSERT_DOUBLE_EQ(percentile(arr, 0.75, Interpolation::Higher), 5.0);
+    ASSERT_DOUBLE_EQ(percentile(arr, 0.5, Interpolation::Midpoint), 3.5);
+    ASSERT_DOUBLE_EQ(percentile(arr, 0.3, Interpolation::Nearest), 2.0);
+}
+
+
+TEST_F(StatsTest, TailRatioTest_PositiveReturns) {
+    std::vector<double> returns = {0.01, 0.02, 0.03, 0.04, 0.05};
+    double expected_ratio = 4.0;  // Right tail and left tail are equal
+    ASSERT_DOUBLE_EQ(tail_ratio(returns), expected_ratio);
+}
+
+TEST_F(StatsTest, TailRatioTest_NegativeReturns) {
+    std::vector<double> returns = {-0.01, -0.02, -0.03, -0.04, -0.05};
+    double expected_ratio = 0.25;  // Right tail and left tail are equal
+    ASSERT_DOUBLE_EQ(tail_ratio(returns), expected_ratio);
+}
+
+TEST_F(StatsTest, TailRatioTest_MixedReturns) {
+    std::vector<double> returns = {-0.01, 0.02, -0.03, 0.04, -0.05};
+    double expected_ratio = 0.7826086956521738;  // Right tail / Left tail
+    ASSERT_DOUBLE_EQ(tail_ratio(returns), expected_ratio);
+    EXPECT_NEAR(tail_ratio(returns), expected_ratio, 0.0001);
+}
+

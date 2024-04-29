@@ -44,4 +44,6 @@ struct DataFrameRollingWindowResult {
     std::size_t numWindows{};
 };
 
+enum class Interpolation { Linear, Lower, Higher, Midpoint, Nearest };
+
 #endif // EMPYRICAL_CPP_PERIOD
