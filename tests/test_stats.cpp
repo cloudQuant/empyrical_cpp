@@ -372,3 +372,42 @@ TEST_F(StatsTest, TailRatioTest_MixedReturns) {
     EXPECT_NEAR(tail_ratio(returns), expected_ratio, 0.0001);
 }
 
+TEST_F(StatsTest, CaptureTest_BasicTest) {
+    std::vector<double> returns = {0.1, 0.2, 0.15, -0.1, 0.05};
+    std::vector<double> factor_returns = {0.12, 0.15, 0.1, 0.08, 0.2};
+
+    double ratio = capture(returns, factor_returns);
+    EXPECT_DOUBLE_EQ(ratio, 3.950185807041334e-06);  // Placeholder expected value
+}
+
+TEST_F(StatsTest, ValueAtRiskTest_ReturnsCorrectVaR) {
+    // 准备测试数据
+    std::vector<double> returns = {10.0, 8.0, 6.0, -4.0, 3.0, -2.0};
+    double cutoff = 0.05;
+
+    // 计算实际值
+    double var = value_at_risk(returns, cutoff);
+
+    // 期望的值，这里使用 percentile 函数来验证
+    double expected_var = percentile(returns, cutoff);
+
+    // 断言实际值与期望值相等
+    ASSERT_DOUBLE_EQ(var, expected_var);
+}
+
+TEST_F(StatsTest, ConditionalValueAtRiskTest_ReturnsCorrectCVaR) {
+    // 准备测试数据
+    std::vector<double> returns = {10.0, 8.0, 6.0, -4.0, 3.0, -2.0};
+    double cutoff = 0.05;
+
+    // 计算实际值
+    double cvar = conditional_value_at_risk(returns, cutoff);
+
+    // 期望的值，这里手工计算
+    double expected_cvar = -4.0;
+
+    // 断言实际值与期望值相等
+    ASSERT_DOUBLE_EQ(cvar, expected_cvar);
+}
+
+

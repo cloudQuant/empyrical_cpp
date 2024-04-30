@@ -7,6 +7,7 @@
 #include "utils.h"
 #include <algorithm>
 #include <numeric>
+//#include <nlopt.hpp>
 
 // 定义函数 adjust_returns
 std::vector<double> adjust_returns(const std::vector<double>& returns, const std::vector<double>& adjustment_factor) {
@@ -428,5 +429,620 @@ double tail_ratio(const std::vector<double>& returns) {
 
     return std::abs(right_tail) / std::abs(left_tail);
 }
+
+double capture(const std::vector<double>& returns,
+               const std::vector<double>& factor_returns,
+               const std::string& period = "daily") {
+    // 计算捕获比率
+    double strategy_annual_return = annual_return_from_simple_return(returns, period);
+    double factor_annual_return = annual_return_from_simple_return(factor_returns, period);
+
+    if (factor_annual_return == 0.0) {
+        return std::numeric_limits<double>::quiet_NaN();  // Handle division by zero
+    }
+
+    return strategy_annual_return / factor_annual_return;
+}
+
+double value_at_risk(const std::vector<double>& returns, double cutoff = 0.05){
+    return percentile(returns, cutoff);
+}
+
+double conditional_value_at_risk(const std::vector<double>& returns, double cutoff=0.05){
+    double threshold = percentile(returns, cutoff);
+    double sum = 0.0;
+    std::size_t count = 0;
+    for (double ret :returns){
+        if (ret < threshold){
+            sum+=ret;
+            count+=1;
+        }
+    }
+    return sum/static_cast<double>(count);
+}
+
+std::pair<std::vector<double>,
+        std::vector<double>> only_up(std::vector<double> & returns,
+                                     std::vector<double> & factor_returns){
+        std::size_t size = returns.size();
+        std::vector<double> new_returns;
+        std::vector<double> new_factor_returns;
+        for (std::size_t i=0; i<size;i++){
+            if (factor_returns[i] > 0){
+                new_returns.push_back(returns[i]);
+                factor_returns.push_back(factor_returns[i]);
+            }
+        }
+        return std::make_pair(new_returns, new_factor_returns);
+}
+
+std::pair<std::vector<double>,
+        std::vector<double>> only_down(std::vector<double> & returns,
+                                     std::vector<double> & factor_returns){
+    std::size_t size = returns.size();
+    std::vector<double> new_returns;
+    std::vector<double> new_factor_returns;
+    for (std::size_t i=0; i<size;i++){
+        if (factor_returns[i] < 0){
+            new_returns.push_back(returns[i]);
+            factor_returns.push_back(factor_returns[i]);
+        }
+    }
+    return std::make_pair(new_returns, new_factor_returns);
+}
+
+
+double up_capture(std::vector<double>& returns,
+                  std::vector<double>&factor_returns,
+                  const std::string& period="daily",
+                  std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
+    auto result = only_up(returns, factor_returns);
+    std::vector<double> new_returns = result.first;
+    std::vector<double> new_factor_returns = result.second;
+    double a = annual_return_from_simple_return(new_returns,period,annualization);
+    double b = annual_return_from_simple_return(new_factor_returns,period,annualization);
+    return a/b;
+}
+
+double down_capture(std::vector<double>& returns,
+                  std::vector<double>&factor_returns,
+                  const std::string& period="daily",
+                  std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
+    auto result = only_down(returns, factor_returns);
+    std::vector<double> new_returns = result.first;
+    std::vector<double> new_factor_returns = result.second;
+    double a = annual_return_from_simple_return(new_returns,period,annualization);
+    double b = annual_return_from_simple_return(new_factor_returns,period,annualization);
+    return a/b;
+}
+
+double up_down_capture(std::vector<double>& returns,
+                        std::vector<double>&factor_returns,
+                        const std::string& period="daily",
+                        std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
+    return up_capture(returns,factor_returns,period,annualization)/down_capture(returns,factor_returns,period,annualization);
+}
+
+std::vector<double> roll_up_capture(std::vector<double>& returns,
+                       std::vector<double>&factor_returns,
+                       const std::string& period="daily",
+                       int window=10,
+                       std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
+
+    std::vector<double> data;
+    std::size_t size = returns.size();
+    data.reserve(size - window + 1);  // 提前预留空间
+
+    // 初始化窗口数据
+    std::vector<double> new_returns(returns.begin(), returns.begin() + window);
+    std::vector<double> new_factor_returns(returns.begin(), returns.begin() + window);
+    // 计算初始窗口的值
+    double v = up_capture(new_returns, new_factor_returns, period, annualization);
+    data.push_back(v);
+
+    // 滑动窗口计算后续值
+    for (std::size_t i = window; i < size; ++i) {
+        // 滑动窗口移除第一个元素，添加新元素
+        new_returns.erase(new_returns.begin());
+        new_returns.push_back(new_returns[i]);
+        new_factor_returns.erase(new_factor_returns.begin());
+        new_factor_returns.push_back(new_factor_returns[i]);
+        v = up_capture(new_returns, new_factor_returns, period, annualization);
+        data.push_back(v);
+    }
+
+    return data;
+}
+
+std::vector<double> roll_down_capture(std::vector<double>& returns,
+                                    std::vector<double>&factor_returns,
+                                    const std::string& period="daily",
+                                    int window=10,
+                                    std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
+
+    std::vector<double> data;
+    std::size_t size = returns.size();
+    data.reserve(size - window + 1);  // 提前预留空间
+
+    // 初始化窗口数据
+    std::vector<double> new_returns(returns.begin(), returns.begin() + window);
+    std::vector<double> new_factor_returns(returns.begin(), returns.begin() + window);
+    // 计算初始窗口的值
+    double v = down_capture(new_returns, new_factor_returns, period, annualization);
+    data.push_back(v);
+
+    // 滑动窗口计算后续值
+    for (std::size_t i = window; i < size; ++i) {
+        // 滑动窗口移除第一个元素，添加新元素
+        new_returns.erase(new_returns.begin());
+        new_returns.push_back(new_returns[i]);
+        new_factor_returns.erase(new_factor_returns.begin());
+        new_factor_returns.push_back(new_factor_returns[i]);
+        v = up_capture(new_returns, new_factor_returns, period, annualization);
+        data.push_back(v);
+    }
+
+    return data;
+}
+
+std::vector<double> roll_up_down_capture(std::vector<double>& returns,
+                                      std::vector<double>&factor_returns,
+                                      const std::string& period="daily",
+                                      int window=10,
+                                      std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
+
+    std::vector<double> data;
+    std::size_t size = returns.size();
+    data.reserve(size - window + 1);  // 提前预留空间
+
+    // 初始化窗口数据
+    std::vector<double> new_returns(returns.begin(), returns.begin() + window);
+    std::vector<double> new_factor_returns(returns.begin(), returns.begin() + window);
+    // 计算初始窗口的值
+    double v = up_down_capture(new_returns, new_factor_returns, period, annualization);
+    data.push_back(v);
+
+    // 滑动窗口计算后续值
+    for (std::size_t i = window; i < size; ++i) {
+        // 滑动窗口移除第一个元素，添加新元素
+        new_returns.erase(new_returns.begin());
+        new_returns.push_back(new_returns[i]);
+        new_factor_returns.erase(new_factor_returns.begin());
+        new_factor_returns.push_back(new_factor_returns[i]);
+        v = up_capture(new_returns, new_factor_returns, period, annualization);
+        data.push_back(v);
+    }
+
+    return data;
+}
+
+
+
+double beta_aligned(const std::vector<double>& returns,
+                    const std::vector<double>& factor_returns) {
+    if (returns.empty() || factor_returns.empty() || returns.size() != factor_returns.size()) {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+    int N = returns.size();  // 数据点数量
+
+    // 计算回归变量的均值
+    double x_mean = 0.0;
+    for (int i = 0; i < N; ++i) {
+        x_mean += factor_returns[i];  // 假设只有一个回归变量
+    }
+    x_mean /= N;
+
+    // 计算因变量的均值
+    double y_mean = 0.0;
+    for (int i = 0; i < N; ++i) {
+        y_mean += returns[i];  // 假设只有一个因变量
+    }
+    y_mean /= N;
+
+    // 计算回归系数 b 的分子和分母
+    double numerator = 0.0;
+    double denominator = 0.0;
+    for (int i = 0; i < N; ++i) {
+        double x_diff = factor_returns[i] - x_mean;  // 假设只有一个回归变量
+        double y_diff = returns[i] - y_mean;  // 假设只有一个因变量
+        numerator += x_diff * y_diff;
+        denominator += x_diff * x_diff;
+    }
+
+    // 避免除以零的情况
+    if (denominator == 0.0) {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+    // 计算回归系数 b
+    double beta = numerator / denominator;
+    return beta;
+}
+
+double calculate_beta(const std::vector<double>& returns,
+                    const std::vector<double>& factor_returns){
+    return beta_aligned(returns, factor_returns);
+}
+
+// 计算 alpha 值的函数
+double alpha_aligned(const std::vector<double>& returns,
+                     const std::vector<double>& factor_returns,
+                     double risk_free = 0.0,
+                     const std::string& period = "daily",
+                     int annualization = 252,
+                     double beta = 0.0) {
+    auto N = returns.size();  // 数据点数量
+    if (N == 0 || factor_returns.size() != N) {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+    // 如果 beta 值未提供，则计算 beta
+    if (beta == 0.0) {
+        // 这里调用你的 beta 计算函数
+        beta = calculate_beta(returns, factor_returns);
+    }
+
+    auto ann_factor = annualization_factor(period, annualization);
+
+    double alpha_sum = 0.0;
+    double alpha = 0.0;
+    for (int i = 0; i < N; ++i) {
+        alpha = returns[i] - (beta * factor_returns[i]);
+        alpha_sum += alpha;
+    }
+    // todo 修改了算法，可能比原始的算法更准确
+    // double alpha_mean = alpha_sum / static_cast<double>(N);
+    // double alpha_annualized = pow(1 + alpha_mean, ann_factor) - 1;
+    double alpha_annualized = pow(1 + alpha_sum, ann_factor/N) - 1;
+
+    return alpha_annualized;
+}
+
+// 计算 alpha 值的函数
+double calculate_alpha(const std::vector<double>& returns,
+             const std::vector<double>& factor_returns,
+             double risk_free = 0.0,
+             const std::string& period = "daily",
+             int annualization = 252,
+             double _beta = 0.0) {
+
+    // 调用 alpha_aligned 函数计算 alpha
+    return alpha_aligned(returns, factor_returns,
+                         risk_free, period, annualization, _beta);
+}
+
+std::pair<double, double> alpha_beta_aligned(const std::vector<double>& returns,
+                   const std::vector<double>& factor_returns,
+                   double risk_free = 0.0,
+                   const std::string& period = "daily",
+                   int annualization = 252) {
+    double beta = calculate_beta(returns, factor_returns);
+    double alpha = calculate_alpha(returns, factor_returns, risk_free,
+                                   period, annualization, beta);
+    return std::make_pair(alpha, beta);
+}
+
+std::pair<double, double> calculate_alpha_beta(const std::vector<double>& returns,
+                                             const std::vector<double>& factor_returns,
+                                             double risk_free = 0.0,
+                                             const std::string& period = "daily",
+                                             int annualization = 252) {
+    return alpha_beta_aligned(returns, factor_returns, risk_free, period, annualization);
+}
+
+std::vector<std::pair<double, double>> roll_alpha_beta(std::vector<double>& returns,
+                                         std::vector<double>&factor_returns,
+                                         int window=10,double risk_free = 0.0,
+                                         const std::string& period="daily",
+                                         int annualization = 252){
+
+    std::vector<std::pair<double, double>> data;
+    std::size_t size = returns.size();
+    data.reserve(size - window + 1);  // 提前预留空间
+
+    // 初始化窗口数据
+    std::vector<double> new_returns(returns.begin(), returns.begin() + window);
+    std::vector<double> new_factor_returns(returns.begin(), returns.begin() + window);
+    // 计算初始窗口的值
+    std::pair<double, double> v = calculate_alpha_beta(new_returns, new_factor_returns, risk_free, period, annualization);
+    data.push_back(v);
+
+    // 滑动窗口计算后续值
+    for (std::size_t i = window; i < size; ++i) {
+        // 滑动窗口移除第一个元素，添加新元素
+        new_returns.erase(new_returns.begin());
+        new_returns.push_back(new_returns[i]);
+        new_factor_returns.erase(new_factor_returns.begin());
+        new_factor_returns.push_back(new_factor_returns[i]);
+        v = calculate_alpha_beta(new_returns, new_factor_returns, risk_free, period, annualization);
+        data.push_back(v);
+    }
+
+    return data;
+}
+
+std::pair<double,double> up_alpha_beta(std::vector<double>& returns,
+                     std::vector<double>&factor_returns,
+                     double risk_free = 0.0,
+                     const std::string& period = "daily",
+                     int annualization = 252 ){
+    auto result = only_up(returns, factor_returns);
+    std::vector<double> new_returns = result.first;
+    std::vector<double> new_factor_returns = result.second;
+    return calculate_alpha_beta(returns,factor_returns,risk_free,period,annualization);
+}
+
+std::pair<double,double> down_alpha_beta(std::vector<double>& returns,
+                                       std::vector<double>&factor_returns,
+                                       double risk_free = 0.0,
+                                       const std::string& period = "daily",
+                                       int annualization = 252 ){
+    auto result = only_down(returns, factor_returns);
+    std::vector<double> new_returns = result.first;
+    std::vector<double> new_factor_returns = result.second;
+    return calculate_alpha_beta(returns,factor_returns,risk_free,period,annualization);
+}
+
+double beta_fragility_heuristic_aligned(const std::vector<double>& returns,
+                                        const std::vector<double>& factor_returns) {
+    if (returns.size() < 3 || factor_returns.size() < 3) {
+        return std::nan("");
+    }
+
+    // Combine returns and factor returns into pairs
+    std::vector<std::pair<double, double>> pairs;
+    for (size_t i = 0; i < returns.size(); ++i) {
+        if (!std::isnan(returns[i]) && !std::isnan(factor_returns[i])) {
+            pairs.emplace_back(returns[i], factor_returns[i]);
+        }
+    }
+
+    if (pairs.size() < 3) {
+        return std::nan("");
+    }
+
+    // Sort by beta
+    std::sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
+        return a.second < b.second;
+    });
+
+    // Find the three vectors, using median of 3
+    size_t start_index = 0;
+    size_t mid_index = pairs.size() / 2;
+    size_t end_index = pairs.size() - 1;
+
+    double start_returns = pairs[start_index].first;
+    double mid_returns = pairs[mid_index].first;
+    double end_returns = pairs[end_index].first;
+
+    double start_factor_returns = pairs[start_index].second;
+    double mid_factor_returns = pairs[mid_index].second;
+    double end_factor_returns = pairs[end_index].second;
+
+    double factor_returns_range = end_factor_returns - start_factor_returns;
+    double start_returns_weight = 0.5;
+    double end_returns_weight = 0.5;
+
+    // Find weights for the start and end returns
+    // using a convex combination
+    if (factor_returns_range != 0) {
+        start_returns_weight = (mid_factor_returns - start_factor_returns) / factor_returns_range;
+        end_returns_weight = (end_factor_returns - mid_factor_returns) / factor_returns_range;
+    }
+
+    // Calculate fragility heuristic
+    double heuristic = (start_returns_weight * start_returns) +
+                       (end_returns_weight * end_returns) -
+                       mid_returns;
+
+    return heuristic;
+}
+
+double calculate_beta_fragility_heuristic(const std::vector<double>& returns,
+                                          const std::vector<double>& factor_returns){
+    return beta_fragility_heuristic_aligned(returns, factor_returns);
+}
+
+
+
+//double gpd_es_calculator(double var_estimate, double threshold, double scale_param, double shape_param) {
+//    double result = 0.0;
+//
+//    if ((1 - shape_param) != 0) {
+//        double var_ratio = (var_estimate / (1 - shape_param));
+//        double param_ratio = ((scale_param - (shape_param * threshold)) / (1 - shape_param));
+//        result = var_ratio + param_ratio;
+//    }
+//
+//    return result;
+//}
+//
+//double gpd_var_calculator(double threshold, double scale_param, double shape_param,
+//                          double probability, double total_n, double exceedance_n) {
+//    double result = 0.0;
+//
+//    if (exceedance_n > 0 && shape_param > 0) {
+//        double param_ratio = scale_param / shape_param;
+//        double prob_ratio = (total_n / exceedance_n) * probability;
+//        result = threshold + (param_ratio * (std::pow(prob_ratio, -shape_param) - 1));
+//    }
+//
+//    return result;
+//}
+//
+//double gpd_loglikelihood_scale_only(double scale, const std::vector<double>& price_data) {
+//    std::size_t n = price_data.size();
+//    double data_sum = 0.0;
+//    for (double price : price_data) {
+//        data_sum += price;
+//    }
+//
+//    double result = -std::numeric_limits<double>::max();
+//    if (scale >= 0) {
+//        result = (-static_cast<double> (n) * std::log(scale)) - (data_sum / scale);
+//    }
+//
+//    return result;
+//}
+//
+//// 基于尺度和形状参数的 GPD 对数似然函数计算
+//double gpd_loglikelihood_scale_and_shape(double scale, double shape, const std::vector<double>& price_data) {
+//    int n = price_data.size();
+//    double result = -std::numeric_limits<double>::max();
+//
+//    if (scale != 0) {
+//        double param_factor = shape / scale;
+//        if (shape != 0 && param_factor >= 0 && scale >= 0) {
+//            double sum_log = 0.0;
+//            for (double price : price_data) {
+//                sum_log += std::log((param_factor * price) + 1);
+//            }
+//            result = (-n * std::log(scale)) - (((1.0 / shape) + 1.0) * sum_log);
+//        }
+//    }
+//
+//    return result;
+//}
+//
+//// GPD 对数似然函数计算，根据参数类型调用不同的函数
+//double gpd_loglikelihood(const std::vector<double>& params, const std::vector<double>& price_data) {
+//    double result = 0.0;
+//
+//    if (params.size() != 2) {
+//        std::cerr << "Error: Parameters should have size 2." << std::endl;
+//        return result;
+//    }
+//
+//    if (params[1] != 0) {
+//        // 调用基于尺度和形状参数的 GPD 对数似然函数计算
+//        result = -gpd_loglikelihood_scale_and_shape(params[0], params[1], price_data);
+//    } else {
+//        // 调用仅基于尺度参数的 GPD 对数似然函数计算
+//        result = -gpd_loglikelihood_scale_only(params[0], price_data);
+//    }
+//
+//    return result;
+//}
+//
+//std::function<double(double)> gpd_loglikelihood_scale_only_factory(const std::vector<double>& price_data) {
+//    return [&price_data](double scale) {
+//        return -gpd_loglikelihood_scale_only(scale,price_data);
+//    };
+//}
+//
+//std::function<double(std::vector<double>)> gpd_loglikelihood_scale_and_shape_factory(const std::vector<double>& price_data) {
+//    return [&price_data](std::vector<double> params) {
+//        if (params.size() == 2) {
+//            return -gpd_loglikelihood_scale_and_shape(params[0], params[1], price_data);
+//        } else {
+//            // Handle invalid input
+//            return 0.0;  // Placeholder return value
+//        }
+//    };
+//}
+//
+//std::function<double(std::vector<double>)> gpd_loglikelihood_factory(const std::vector<double>& price_data) {
+//    return [&price_data](const std::vector<double>& params) {
+//        return gpd_loglikelihood(params, price_data);
+//    };
+//}
+//
+//std::vector<double> gpd_loglikelihood_minimizer_aligned(const std::vector<double> &price_data) {
+//    std::vector<double> result = {false, false};
+//    const double DEFAULT_SCALE_PARAM = 1.0;
+//    const double DEFAULT_SHAPE_PARAM = 1.0;
+//
+//    if (!price_data.empty()) {
+//        nlopt::opt opt(nlopt::LN_NELDERMEAD, 2); // Nelder-Mead optimization with 2 parameters
+//
+//        // Set objective function and data
+//        opt.set_min_objective(gpd_loglikelihood, &price_data);
+//
+//        // Set initial guess
+//        std::vector<double> x(2);
+//        x[0] = DEFAULT_SCALE_PARAM;
+//        x[1] = DEFAULT_SHAPE_PARAM;
+//        opt.set_initial_step(0.1);
+//
+//        // Set optimization options
+//        opt.set_xtol_rel(1e-6);
+//
+//        // Perform optimization
+//        double minf; // Minimum function value
+//        nlopt::result result_status = opt.optimize(x, minf);
+//
+//        if (result_status == nlopt::SUCCESS) {
+//            result[0] = x[0];
+//            result[1] = x[1];
+//        }
+//    }
+//    return result;
+//}
+//
+//std::vector<double> gpd_risk_estimates_aligned(std::vector<double>& returns, double var_p = 0.01) {
+//    std::vector<double> result(5, 0.0);
+//    if (returns.size() >= 3) {
+//        const double DEFAULT_THRESHOLD = 0.2;
+//        const double MINIMUM_THRESHOLD = 0.000000001;
+//
+//        std::vector<double> flipped_returns(returns.size());
+//        std::transform(returns.begin(), returns.end(), flipped_returns.begin(), [](double val) { return -val; });
+//
+//        std::vector<double> losses;
+//        for (double val : flipped_returns) {
+//            if (val > 0) {
+//                losses.push_back(val);
+//            }
+//        }
+//
+//        double threshold = DEFAULT_THRESHOLD;
+//        bool finished = false;
+//        double scale_param = 0.0;
+//        double shape_param = 0.0;
+//
+//        while (!finished && threshold > MINIMUM_THRESHOLD) {
+//            std::vector<double> losses_beyond_threshold;
+//            for (double loss : losses) {
+//                if (loss >= threshold) {
+//                    losses_beyond_threshold.push_back(loss);
+//                }
+//            }
+//
+//            std::vector<double> param_result = gpd_loglikelihood_minimizer_aligned(losses_beyond_threshold);
+//            if (!param_result.empty()) {
+//                scale_param = param_result[0];  // Placeholder assignment
+//                shape_param = param_result[1];  // Placeholder assignment
+//                double var_estimate = gpd_var_calculator(threshold, scale_param, shape_param, var_p,
+//                                                         losses.size(), losses_beyond_threshold.size());
+//
+//                if (shape_param > 0 && var_estimate > 0) {
+//                    finished = true;
+//                }
+//            }
+//
+//            if (!finished) {
+//                threshold /= 2;
+//            }
+//        }
+//
+//        if (finished) {
+//            double es_estimate = gpd_es_calculator(result[3], result[0], scale_param, shape_param);
+//            result = {threshold, scale_param, shape_param, result[3], es_estimate};
+//        }
+//    }
+//
+//    return result;
+//}
+//
+//std::vector<double> gpd_risk_estimates(std::vector<double>& returns, double var_p = 0.01) {
+//    if (returns.size() < 3) {
+//        std::vector<double> result(5, 0.0);
+//        return result;
+//    }
+//
+//    return gpd_risk_estimates_aligned(returns, var_p);
+//}
+
 
 #endif // EMPYRICAL_CPP_STATS

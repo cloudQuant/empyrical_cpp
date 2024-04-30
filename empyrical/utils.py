@@ -118,56 +118,56 @@ def roll(*args, **kwargs):
     return _roll_pandas(func, window, *args, **kwargs)
 
 
-def up(returns, factor_returns, **kwargs):
-    """
-    Calculates a given statistic filtering only positive factor return periods.
+# def up(returns, factor_returns, **kwargs):
+#     """
+#     Calculates a given statistic filtering only positive factor return periods.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     factor_returns (optional): float / series
+#         Benchmark return to compare returns against.
+#     function:
+#         the function to run for each rolling window.
+#     (other keywords): other keywords that are required to be passed to the
+#         function in the 'function' argument may also be passed in.
+#
+#     Returns
+#     -------
+#     Same as the return of the function
+#     """
+#     func = kwargs.pop('function')
+#     returns = returns[factor_returns > 0]
+#     factor_returns = factor_returns[factor_returns > 0]
+#     return func(returns, factor_returns, **kwargs)
 
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    factor_returns (optional): float / series
-        Benchmark return to compare returns against.
-    function:
-        the function to run for each rolling window.
-    (other keywords): other keywords that are required to be passed to the
-        function in the 'function' argument may also be passed in.
 
-    Returns
-    -------
-    Same as the return of the function
-    """
-    func = kwargs.pop('function')
-    returns = returns[factor_returns > 0]
-    factor_returns = factor_returns[factor_returns > 0]
-    return func(returns, factor_returns, **kwargs)
-
-
-def down(returns, factor_returns, **kwargs):
-    """
-    Calculates a given statistic filtering only negative factor return periods.
-
-    Parameters
-    ----------
-    returns : pd.Series or np.ndarray
-        Daily returns of the strategy, noncumulative.
-        - See full explanation in :func:`~empyrical.stats.cum_returns`.
-    factor_returns (optional): float / series
-        Benchmark return to compare returns against.
-    function:
-        the function to run for each rolling window.
-    (other keywords): other keywords that are required to be passed to the
-        function in the 'function' argument may also be passed in.
-
-    Returns
-    -------
-    Same as the return of the 'function'
-    """
-    func = kwargs.pop('function')
-    returns = returns[factor_returns < 0]
-    factor_returns = factor_returns[factor_returns < 0]
-    return func(returns, factor_returns, **kwargs)
+# def down(returns, factor_returns, **kwargs):
+#     """
+#     Calculates a given statistic filtering only negative factor return periods.
+#
+#     Parameters
+#     ----------
+#     returns : pd.Series or np.ndarray
+#         Daily returns of the strategy, noncumulative.
+#         - See full explanation in :func:`~empyrical.stats.cum_returns`.
+#     factor_returns (optional): float / series
+#         Benchmark return to compare returns against.
+#     function:
+#         the function to run for each rolling window.
+#     (other keywords): other keywords that are required to be passed to the
+#         function in the 'function' argument may also be passed in.
+#
+#     Returns
+#     -------
+#     Same as the return of the 'function'
+#     """
+#     func = kwargs.pop('function')
+#     returns = returns[factor_returns < 0]
+#     factor_returns = factor_returns[factor_returns < 0]
+#     return func(returns, factor_returns, **kwargs)
 
 
 # def _roll_ndarray(func, window, *args, **kwargs):
