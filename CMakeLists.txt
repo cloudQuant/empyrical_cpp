@@ -17,7 +17,8 @@ include(GoogleTest)
 
 
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fsanitize=address")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fsanitize=address")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 
 include_directories(
@@ -31,10 +32,10 @@ if (DEFINED ${BOOST_INCLUDE_DIR})
 endif()
 
 set(EMPYRICAL_HEADERS
-        empyrical/utils.h
-        empyrical/perf_attrib.h
-        empyrical/constants.h
-        empyrical/stats.h
+        ../include/empyrical/utils.h
+        ../include/empyrical/perf_attrib.h
+        ../include/empyrical/constants.h
+        ../include/empyrical/stats.h
 )
 
 set(EMPYRICAL_SOURCES
@@ -46,7 +47,8 @@ add_executable(
         #
         main.cpp
         #
-        ${EMPYRICAL_SOURCES}
+        # ${EMPYRICAL_SOURCES}
+        ${EMPYRICAL_HEADERS}
 )
 
 if (DEFINED ${BOOST_LIB_DIR})
@@ -66,6 +68,10 @@ enable_testing()
 
 add_executable(
         empyrical_test
+        ../include/empyrical/utils.h
+        ../include/empyrical/perf_attrib.h
+        ../include/empyrical/constants.h
+        ../include/empyrical/stats.h
         tests/test_utils.cpp
         tests/test_stats.cpp
         tests/test_perf_attrib.cpp

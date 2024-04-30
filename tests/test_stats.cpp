@@ -4,7 +4,9 @@ class StatsTest : public ::testing::Test {
 protected:
     // You can add setup and teardown code here if needed
 };
-
+TEST_F(StatsTest, NormalTeest2){
+    ASSERT_EQ(2,2);
+}
 // 测试 _adjust_returns 函数
 TEST_F(StatsTest, AdjustReturns) {
 // 准备测试数据
