@@ -75,6 +75,7 @@ add_executable(
         tests/test_utils.cpp
         tests/test_stats.cpp
         tests/test_perf_attrib.cpp
+        tests/test_original_utils.cpp
 
 )
 

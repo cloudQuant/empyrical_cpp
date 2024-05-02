@@ -226,7 +226,7 @@ TEST_F(StatsTest, OmegaCalculatorTest_ReturnsNaNWhenDownIsZero) {
 
 TEST_F(StatsTest, SharpeRatioTest_ValidInput) {
     std::vector<double> returns = {0.1, 0.05, -0.02, 0.03, 0.08};  // 示例收益率序列
-    double risk_free_rate = 0.02;  // 无风险利率
+    double risk_free_rate = 0.02/252;  // 无风险利率
     double sharpe_ratio = calculate_sharpe_ratio(returns, risk_free_rate);
     EXPECT_NEAR(sharpe_ratio, 1.028709, 1e-5);  // 预期值
 }
@@ -241,7 +241,7 @@ TEST_F(StatsTest, SharpeRatioTest_EmptyInput) {
 TEST_F(StatsTest, AnnualizedSharpeRatioTest_ValidInput) {
     std::vector<double> returns = {0.1, 0.05, -0.02, 0.03, 0.08};  // 示例收益率序列
     int annualization = 252;  // 年化频率
-    double risk_free_rate = 0.02;  // 无风险利率
+    double risk_free_rate = 0.02/annualization;  // 无风险利率
     double annualized_sharpe_ratio = calculate_annualized_sharpe_ratio(returns, annualization, risk_free_rate);
     EXPECT_NEAR(annualized_sharpe_ratio, 16.330255, 1e-3);  // 预期值
 }

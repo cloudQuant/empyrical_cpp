@@ -14,6 +14,9 @@
 #include <cassert>
 #include <cstring>
 #include <iomanip>
+#include <ctime>
+#include <random>
+#include <chrono>
 #include "constants.h"
 namespace dtf {
 
@@ -32,6 +35,107 @@ struct flags {
         ,nsecs      = 1u << 8u // nanoseconds resolution
     };
 };
+
+inline  std::vector<std::chrono::system_clock::time_point> date_range(const std::string& start_date_str,
+                                                                      int periods,
+                                                                      const std::string& freq,
+                                                                      bool v=true) {
+        // Define time step based on frequency
+        // Convert start date string to time point
+        std::tm tm = {};
+        strptime(start_date_str.c_str(), "%Y-%m-%d", &tm);
+        std::time_t start_time = std::mktime(&tm);
+        std::chrono::system_clock::time_point start_date =
+                std::chrono::system_clock::from_time_t(start_time);
+        // Generate datetime list
+        std::vector<std::chrono::system_clock::time_point> datetime_list;
+        // Default to daily frequency
+        if (freq == "H") {
+            std::chrono::hours time_step = std::chrono::hours(1);  // Hourly frequency
+            for (int i = 0; i < periods; ++i) {
+                datetime_list.push_back(start_date + i * time_step);
+            }
+        } else if (freq == "M") {
+            std::chrono::minutes time_step = std::chrono::minutes(1);  // Minutely frequency
+            for (int i = 0; i < periods; ++i) {
+                datetime_list.push_back(start_date + i * time_step);
+            }
+        } else {
+            std::chrono::hours time_step(24);
+            for (int i = 0; i < periods; ++i) {
+                datetime_list.push_back(start_date + i * time_step);
+            }
+        }
+        return datetime_list;
+    }
+
+    // 将时间点转换为字符串格式（包含毫秒、微秒、纳秒）
+inline  std::string timePointToString(const std::chrono::system_clock::time_point& timePoint) {
+        // 转换为time_t类型
+        std::time_t time = std::chrono::system_clock::to_time_t(timePoint);
+
+        // 使用std::put_time和std::strftime将time_t格式化为字符串
+        std::tm tm = *std::localtime(&time);
+        auto duration = timePoint.time_since_epoch();
+        auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+        auto fractional_seconds = milliseconds % 1000;
+
+        // 计算微秒和纳秒
+        auto micro = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+        auto micro_fraction = micro % 1000;
+        auto nano = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);
+        auto nano_fraction = nano % 1000;
+
+        std::stringstream ss;
+        ss << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+        ss << "." << std::setfill('0') << std::setw(3) << fractional_seconds.count(); // 添加毫秒
+        ss << std::setfill('0') << std::setw(3) << micro_fraction.count(); // 添加微秒
+        ss << std::setfill('0') << std::setw(3) << nano_fraction.count(); // 添加纳秒
+
+        return ss.str();
+    }
+
+inline std::vector<std::string> date_range(const std::string& start_date_str,
+                                           int periods,
+                                           const std::string& freq,
+                                           int type = 0) {
+        // Define time step based on frequency
+        // Convert start date string to time point
+        std::tm tm = {};
+        strptime(start_date_str.c_str(), "%Y-%m-%d", &tm);
+        std::time_t start_time = std::mktime(&tm);
+        std::chrono::system_clock::time_point start_date =
+                std::chrono::system_clock::from_time_t(start_time);
+        // Generate datetime list
+        std::vector<std::string> datetime_list;
+        // Default to daily frequency
+        if (freq == "H") {
+            std::chrono::hours time_step = std::chrono::hours(1);  // Hourly frequency
+            for (int i = 0; i < periods; ++i) {
+                std::string r = timePointToString(start_date + i * time_step);
+                datetime_list.push_back(r);
+            }
+        } else if (freq == "MIN") {
+            std::chrono::minutes time_step = std::chrono::minutes(1);  // Minutely frequency
+            for (int i = 0; i < periods; ++i) {
+                std::string r = timePointToString(start_date + i * time_step);
+                datetime_list.push_back(r);
+            }
+        } else if (freq == "W"){
+            std::chrono::hours time_step(24*7);
+            for (int i = 0; i < periods; ++i) {
+                std::string r = timePointToString(start_date + i * time_step);
+                datetime_list.push_back(r);
+            }
+        } else {
+            std::chrono::hours time_step(24);
+            for (int i = 0; i < periods; ++i) {
+                std::string r = timePointToString(start_date + i * time_step);
+                datetime_list.push_back(r);
+            }
+        }
+        return datetime_list;
+    }
 
 /*************************************************************************************************/
 
@@ -540,6 +644,73 @@ namespace cal_func{
             }
         }
         return idx;
+    }
+    // 对vector中的数据取相反数
+    inline std::vector<double> inverseVector(const std::vector<double> & vec){
+        std::size_t size = vec.size();
+        std::vector<double> result(size,0);
+        for (std::size_t i=0; i<size; i++){
+            result[i] = -1*vec[i];
+        }
+        return result;
+    }
+
+    // Generate random numbers with normal distribution
+    inline std::vector<double> generateRandomNormal(int numValues, double mean, double stddev) {
+        std::vector<double> values;
+        std::default_random_engine generator(std::time(nullptr));
+        std::normal_distribution<double> distribution(mean, stddev);
+
+        for (int i = 0; i < numValues; ++i) {
+            double number = distribution(generator);
+            values.push_back(number);
+        }
+
+        return values;
+    }
+
+    // 生成范围在[min, max]之间的均匀分布随机数
+    inline double uniformRandom(double min, double max) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<> dis(min, max);
+        return dis(gen);
+    }
+
+    inline std::vector<double> generateUniformRandom(double min, double max, int num){
+        std::vector<double> result(num, 0);
+        for(int i = 0; i<num;++i){
+            result[i] = uniformRandom(min, max);
+        }
+        return result;
+    }
+
+    // 生成包含 num 个元素，从 start 到 end 的等差数组
+    inline std::vector<double> generateLinspace(double start, double end, int num) {
+        std::vector<double> result(num);
+        double step = (end - start) / (num - 1);
+        for (int i = 0; i < num; ++i) {
+            result[i] = start + i * step;
+        }
+        return result;
+    }
+
+    // 生成包含 min 到 max 之间的随机整数
+    inline int randomInt(int min, int max) {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_int_distribution<> distrib(min, max);
+        return distrib(gen);
+    }
+
+    // 把vector的值随机用一个NAN代替
+    inline std::vector<double> replaceOneRandomValueWithNan(const std::vector<double>& vec){
+        int i = randomInt(0, static_cast<int>(vec.size())-1);
+        std::vector<double> result(vec);
+        result[i] = NAN;
+        return result;
+
+
     }
 }
 #endif // EMPYRICAL_UTILS

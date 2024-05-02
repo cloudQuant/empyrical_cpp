@@ -6,10 +6,6 @@ protected:
     // You can add setup and teardown code here if needed
 };
 
-TEST_F(DtfTest, NormalTeest){
-    ASSERT_EQ(2,2);
-}
-
 // Test case for dt_str_flags function
 TEST_F(DtfTest, TestDtStrFlags) {
     const char *buffer1 = "2021-01-01 00:00:00";
@@ -635,6 +631,29 @@ TEST_F(UtilsTest, AllNaNTest2) {
                                      std::numeric_limits<double>::quiet_NaN()};
     std::size_t result_idx = cal_func::nan_argmin(test_data);
     EXPECT_EQ(result_idx, static_cast<std::size_t>(-1)); // 无效索引
+}
+
+TEST_F(DtfTest, DateRange){
+    std::vector<std::chrono::system_clock::time_point> datetime_list =
+            dtf::date_range("2000-01-30", 1000, "D", true);
+
+    // Print the datetime list
+//    for (const auto& dt : datetime_list) {
+//        std::time_t time = std::chrono::system_clock::to_time_t(dt);
+//        std::cout << std::ctime(&time);
+//    }
+
+}
+
+TEST_F(DtfTest, timePointToString){
+    // 获取当前时间点（包含毫秒）
+    std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+
+    // 转换为字符串格式（包含毫秒）
+    std::string strTime = dtf::timePointToString(now);
+
+    // 输出转换后的时间
+    std::cout << "Current time (with milliseconds): " << strTime << std::endl;
 }
 
 

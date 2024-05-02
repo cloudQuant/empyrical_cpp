@@ -32,6 +32,18 @@ const std::unordered_map<std::string, std::size_t> ANNUALIZATION_FACTORS = {
 using CustomFunc = std::function<double(const std::vector<double>&,
                                         const std::map<std::string, double>)>;
 
+struct PdSeries{
+    std::vector<std::string> index;
+    std::vector<std::string> cols;
+    std::vector<double> values;
+};
+
+struct PdDataFrame{
+    std::vector<std::string> index;
+    std::vector<std::string> cols;
+    std::vector<std::vector<double>> values;
+};
+
 using Array = std::vector<double>;
 using DataFrame = std::vector<std::vector<double>>;
 
