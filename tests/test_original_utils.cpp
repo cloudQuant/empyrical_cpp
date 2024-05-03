@@ -959,3 +959,38 @@ TEST_F(OriginalStatsTest, test_sortino_ratio_18){
 //    ASSERT_NEAR(sr, sr_raised, 0.0001);
 }
 
+TEST_F(OriginalStatsTest, test_excess_sharpe_1){
+    double actual_value = calculate_excess_sharpe_ratio(empty_returns_value, 0, 0);
+    //double expect_value = 0.53605626741889756;
+    //ASSERT_NEAR(actual_value, expect_value, 0.0001);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_2){
+    double actual_value = calculate_excess_sharpe_ratio(one_returns_value, 0, 0);
+    //double expect_value = 0.53605626741889756;
+    //ASSERT_NEAR(actual_value, expect_value, 0.0001);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_3){
+    double actual_value = calculate_excess_sharpe_ratio(pos_line_value, pos_line_value, 0);
+    //double expect_value = 0.53605626741889756;
+    //ASSERT_NEAR(actual_value, expect_value, 0.0001);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_4){
+    double actual_value = calculate_excess_sharpe_ratio(mixed_returns_value, 0, 1);
+    double expect_value = 0.10859306069076737;
+    ASSERT_NEAR(actual_value, expect_value, 0.0001);
+//    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_5){
+    double actual_value = calculate_excess_sharpe_ratio(mixed_returns_value, flat_line_1_value, 1);
+    double expect_value = -0.06515583641446039;
+    ASSERT_NEAR(actual_value, expect_value, 0.0001);
+//    ASSERT_TRUE(std::isnan(actual_value));
+}
+

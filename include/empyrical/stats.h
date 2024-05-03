@@ -491,6 +491,24 @@ inline double calculate_excess_sharpe_ratio(std::vector<double>& returns,
     }
 }
 
+inline double calculate_excess_sharpe_ratio(std::vector<double>& returns,
+                                     double factor_returns,
+                                     std::size_t d_dof = 1
+                                     ){
+    std::size_t length = returns.size();
+    std::vector<double> active_returns(length, 0);
+    for (std::size_t i=0;i<length;i++){
+        active_returns[i] = returns[i] - factor_returns;
+    }
+    double average_return = cal_func::nan_mean(active_returns);
+    double tracking_error = cal_func::nan_std(active_returns,d_dof);
+    if (tracking_error > 0){
+        return average_return/tracking_error;
+    }else{
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+}
+
 inline double stability_of_timeseries(const std::vector<double>& returns) {
     if (returns.size() < 2) {
         return std::nan("");

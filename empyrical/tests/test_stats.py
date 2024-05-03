@@ -72,21 +72,6 @@ class TestStats(BaseTestCase):
                 expected[i],
                 DECIMAL_PLACES)
 
-
-    # Regressive tests for information ratio
-    @parameterized.expand([
-        (empty_returns, 0.0, np.nan),
-        (one_return, 0.0, np.nan),
-        (pos_line, pos_line, np.nan),
-        (mixed_returns, 0.0, 0.10859306069076737),
-        (mixed_returns, flat_line_1, -0.06515583641446039),
-    ])
-    def test_excess_sharpe(self, returns, factor_returns, expected):
-        assert_almost_equal(
-            self.empyrical.excess_sharpe(returns, factor_returns),
-            expected,
-            DECIMAL_PLACES)
-
     # The magnitude of the information ratio increases as a higher
     # proportion of returns are uncorrelated with the benchmark.
     @parameterized.expand([
