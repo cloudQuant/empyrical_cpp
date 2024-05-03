@@ -4,6 +4,7 @@
 /*
  * 1. don't test omega_ratio as the original test because fix the bug of omega ratio
  * 2. sharpe_ratio don't test risk-free rate's value is an array
+ * 3. don't test the dataframe data's downside_risk
  */
 
 class OriginalStatsTest : public ::testing::Test {
@@ -564,5 +565,397 @@ TEST_F(OriginalStatsTest, test_sharpe_ratio_14){
 //    ASSERT_NEAR(sr, sr_depressed, 0.0001);
 //    ASSERT_NEAR(sr, sr_raised, 0.0001);
     ASSERT_GT(sr_depressed, sr_raised);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_1){
+    double actual_value = calculate_downside_risk(empty_returns_value, 0);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_2){
+    double actual_value = calculate_downside_risk(one_returns_value, 0);
+    double except_value = 0;
+    ASSERT_NEAR(actual_value, except_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_3){
+    double actual_value = calculate_downside_risk(mixed_returns_value, mixed_returns_value);
+    double except_value = 0;
+    ASSERT_NEAR(actual_value, except_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_4){
+    double actual_value = calculate_downside_risk(mixed_returns_value, 0);
+    double except_value = 0.60448325038829653;
+    ASSERT_NEAR(actual_value*std::sqrt(252), except_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_5){
+    double actual_value = calculate_downside_risk(mixed_returns_value, 0.1);
+    double except_value = 1.7161730681956295;
+    ASSERT_NEAR(actual_value*std::sqrt(252), except_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_6){
+    double actual_value = calculate_downside_risk(weekly_returns_value, 0.0);
+    double except_value = 0.25888650451930134;
+    ASSERT_NEAR(actual_value*std::sqrt(WEEKS_PER_YEAR), except_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_7){
+    double actual_value = calculate_downside_risk(weekly_returns_value, 0.1);
+    double except_value = 0.7733045971672482;
+    ASSERT_NEAR(actual_value*std::sqrt(WEEKS_PER_YEAR), except_value, 0.0001);
+}
+
+
+TEST_F(OriginalStatsTest, test_downside_risk_8){
+    double actual_value = calculate_downside_risk(monthly_returns_value, 0.0);
+    double except_value = 0.1243650540411842;
+    ASSERT_NEAR(actual_value*std::sqrt(MONTHS_PER_YEAR), except_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_9){
+    double actual_value = calculate_downside_risk(monthly_returns_value, 0.1);
+    double except_value = 0.37148351242013422;
+    ASSERT_NEAR(actual_value*std::sqrt(MONTHS_PER_YEAR), except_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_10){
+    std::vector<double> noisy_returns_1;
+    noisy_returns_1.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<250){
+            noisy_returns_1.push_back(noise_value[i]);
+        }else{
+            noisy_returns_1.push_back(flat_line_0_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_2;
+    noisy_returns_2.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<500){
+            noisy_returns_2.push_back(noise_value[i]);
+        }else{
+            noisy_returns_2.push_back(flat_line_0_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_3;
+    noisy_returns_3.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<750){
+            noisy_returns_3.push_back(noise_value[i]);
+        }else{
+            noisy_returns_3.push_back(flat_line_0_value[i]);
+        }
+    }
+    double dr_1 = calculate_downside_risk(noisy_returns_1, flat_line_0_value);
+    double dr_2 = calculate_downside_risk(noisy_returns_2, flat_line_0_value);
+    double dr_3 = calculate_downside_risk(noisy_returns_3, flat_line_0_value);
+    ASSERT_NE(dr_1, dr_2);
+    ASSERT_NE(dr_2, dr_3);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_11){
+    std::vector<double> noisy_returns_1;
+    noisy_returns_1.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<250){
+            noisy_returns_1.push_back(noise_uniform_value[i]);
+        }else{
+            noisy_returns_1.push_back(flat_line_0_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_2;
+    noisy_returns_2.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<500){
+            noisy_returns_2.push_back(noise_uniform_value[i]);
+        }else{
+            noisy_returns_2.push_back(flat_line_0_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_3;
+    noisy_returns_3.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<750){
+            noisy_returns_3.push_back(noise_uniform_value[i]);
+        }else{
+            noisy_returns_3.push_back(flat_line_0_value[i]);
+        }
+    }
+    double dr_1 = calculate_downside_risk(noisy_returns_1, flat_line_0_value);
+    double dr_2 = calculate_downside_risk(noisy_returns_2, flat_line_0_value);
+    double dr_3 = calculate_downside_risk(noisy_returns_3, flat_line_0_value);
+    ASSERT_NE(dr_1, dr_2);
+    ASSERT_NE(dr_2, dr_3);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_12){
+    double dr_1 = calculate_downside_risk(noise_value, -0.005);
+    double dr_2 = calculate_downside_risk(noise_value, 0);
+    double dr_3 = calculate_downside_risk(noise_value, 0.005);
+    ASSERT_NE(dr_1, dr_2);
+    ASSERT_NE(dr_2, dr_3);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_13){
+    double dr_1 = calculate_downside_risk(noise_uniform_value, -0.005);
+    double dr_2 = calculate_downside_risk(noise_uniform_value, 0);
+    double dr_3 = calculate_downside_risk(noise_uniform_value, 0.005);
+    ASSERT_NE(dr_1, dr_2);
+    ASSERT_NE(dr_2, dr_3);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_14){
+    std::vector<double> less_noise = cal_func::generateRandomNormal(1000, 0, 0.001);
+    std::vector<double> more_noise = cal_func::generateRandomNormal(1000, 0, 0.002);
+    double less = calculate_downside_risk(less_noise, 0);
+    double more = calculate_downside_risk(more_noise, 0);
+    ASSERT_NE(less, more);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_15){
+    std::vector<double> less_noise = cal_func::generateRandomNormal(1000, 0, 0.001);
+    std::vector<double> more_noise = cal_func::generateRandomNormal(1000, 0, 0.01);
+    double less = calculate_downside_risk(less_noise, 0);
+    double more = calculate_downside_risk(more_noise, 0);
+    ASSERT_NE(less, more);
+}
+
+TEST_F(OriginalStatsTest, test_downside_risk_16){
+    std::vector<double> less_noise(1000, 0);
+    std::vector<double> more_noise = cal_func::generateRandomNormal(1000, 0, 0.001);
+    double less = calculate_downside_risk(less_noise, 0);
+    double more = calculate_downside_risk(more_noise, 0);
+    ASSERT_NE(less, more);
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_01){
+    double actual_value = calculate_annualized_sortino_ratio(empty_returns_value, 252);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_02){
+    double actual_value = calculate_annualized_sortino_ratio(one_returns_value, 252);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_03){
+    double actual_value = calculate_annualized_sortino_ratio(mixed_returns_value, 252, mixed_returns_value);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_04){
+    double actual_value = calculate_annualized_sortino_ratio(mixed_returns_value, APPROX_BDAYS_PER_YEAR, 0);
+    double expect_value = 2.605531251673693;
+    ASSERT_NEAR(actual_value, expect_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_05){
+    double actual_value = calculate_annualized_sortino_ratio(mixed_returns_value, APPROX_BDAYS_PER_YEAR, flat_line_1_value);
+    double expect_value = -1.3934779588919977;
+    ASSERT_NEAR(actual_value, expect_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_06){
+    double actual_value = calculate_annualized_sortino_ratio(positive_returns_value, APPROX_BDAYS_PER_YEAR, 0.0);
+    // ASSERT_NEAR(actual_value, expect_value, 0.0001);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_07){
+    double actual_value = calculate_annualized_sortino_ratio(negative_returns_value, APPROX_BDAYS_PER_YEAR, 0);
+    double expect_value = -13.532743075043401;
+    ASSERT_NEAR(actual_value, expect_value, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_08){
+    double actual_value = calculate_annualized_sortino_ratio(simple_benchmark_value, APPROX_BDAYS_PER_YEAR, 0);
+    //double expect_value = 0;
+    // ASSERT_NEAR(actual_value, expect_value, 0.0001);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_09){
+    double actual_value = calculate_annualized_sortino_ratio(weekly_returns_value, WEEKS_PER_YEAR, 0);
+    double expect_value = 1.1158901056866439;
+    ASSERT_NEAR(actual_value, expect_value, 0.0001);
+    //ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_10){
+    double actual_value = calculate_annualized_sortino_ratio(monthly_returns_value, MONTHS_PER_YEAR, 0);
+    double expect_value = 0.53605626741889756;
+    ASSERT_NEAR(actual_value, expect_value, 0.0001);
+    //ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_11){
+    std::vector<double> new_return(noise_uniform_value);
+    double sr_1 = calculate_annualized_sortino_ratio(noise_uniform_value, APPROX_BDAYS_PER_YEAR, 0);
+    std::vector<std::size_t> index;
+    for (std::size_t i = 0; i< noise_uniform_value.size(); i++){
+        if (noise_uniform_value[i]>0){
+            index.push_back(i);
+        }
+    }
+    std::size_t m = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    new_return[m]=-0.01;
+    double sr_2 = calculate_annualized_sortino_ratio(new_return, APPROX_BDAYS_PER_YEAR, 0);
+    std::size_t n = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    while (n==m){
+        n = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    }
+    new_return[n] = -0.01;
+    double sr_3 = calculate_annualized_sortino_ratio(new_return, APPROX_BDAYS_PER_YEAR, 0);
+    ASSERT_NE(sr_1, sr_2);
+    ASSERT_NE(sr_2, sr_3);
+    //ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_12){
+    std::vector<double> new_return(noise_value);
+    double sr_1 = calculate_annualized_sortino_ratio(noise_value, APPROX_BDAYS_PER_YEAR, 0);
+    std::vector<std::size_t> index;
+    for (std::size_t i = 0; i< noise_value.size(); i++){
+        if (noise_value[i]>0){
+            index.push_back(i);
+        }
+    }
+    std::size_t m = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    new_return[m]=-0.01;
+    double sr_2 = calculate_annualized_sortino_ratio(new_return, APPROX_BDAYS_PER_YEAR, 0);
+    std::size_t n = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    while (n==m){
+        n = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    }
+    new_return[n] = -0.01;
+    double sr_3 = calculate_annualized_sortino_ratio(new_return, APPROX_BDAYS_PER_YEAR, 0);
+    ASSERT_NE(sr_1, sr_2);
+    ASSERT_NE(sr_2, sr_3);
+    //ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_13){
+    std::vector<double> new_return(noise_uniform_value);
+    double sr_1 = calculate_annualized_sortino_ratio(noise_uniform_value, APPROX_BDAYS_PER_YEAR, 0);
+    std::vector<std::size_t> index;
+    for (std::size_t i = 0; i< noise_uniform_value.size(); i++){
+        if (noise_uniform_value[i]<0){
+            index.push_back(i);
+        }
+    }
+    std::size_t m = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    new_return[m]=0;
+    double sr_2 = calculate_annualized_sortino_ratio(new_return, APPROX_BDAYS_PER_YEAR, 0);
+    std::size_t n = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    while (n==m){
+        n = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    }
+    new_return[n] = 0;
+    double sr_3 = calculate_annualized_sortino_ratio(new_return, APPROX_BDAYS_PER_YEAR, 0);
+    ASSERT_NE(sr_3, sr_2);
+    ASSERT_NE(sr_2, sr_1);
+    //ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_14){
+    std::vector<double> new_return(noise_value);
+    double sr_1 = calculate_annualized_sortino_ratio(noise_value, APPROX_BDAYS_PER_YEAR, 0);
+    std::vector<std::size_t> index;
+    for (std::size_t i = 0; i< noise_value.size(); i++){
+        if (noise_value[i]<0){
+            index.push_back(i);
+        }
+    }
+    std::size_t m = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    new_return[m]=0;
+    double sr_2 = calculate_annualized_sortino_ratio(new_return, APPROX_BDAYS_PER_YEAR, 0);
+    std::size_t n = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    while (n==m){
+        n = cal_func::randomInt(0, static_cast<int>(index.size()-1));
+    }
+    new_return[n] = 0;
+    double sr_3 = calculate_annualized_sortino_ratio(new_return, APPROX_BDAYS_PER_YEAR, 0);
+    ASSERT_NE(sr_3, sr_2);
+    ASSERT_NE(sr_2, sr_1);
+    //ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_15){
+    double sr = calculate_annualized_sortino_ratio(noise_uniform_value, 252, 0);
+    std::vector<double> depressed_returns(noise_uniform_value);
+    for (double &v: depressed_returns){
+        v-=0.005;
+    }
+
+    std::vector<double> raised_returns(noise_uniform_value);
+    for (double &v: raised_returns){
+        v+=0.005;
+    }
+    double sr_depressed = calculate_annualized_sortino_ratio(depressed_returns, 252, -0.005);
+    double sr_raised = calculate_annualized_sortino_ratio(raised_returns, 252, 0.005);
+    ASSERT_NEAR(sr, sr_depressed, 0.0001);
+    ASSERT_NEAR(sr, sr_raised, 0.0001);
 
 }
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_16){
+    double sr = calculate_annualized_sortino_ratio(noise_uniform_value, 252, 0.005);
+    std::vector<double> depressed_returns(noise_uniform_value);
+    for (double &v: depressed_returns){
+        v-=0.005;
+    }
+
+    std::vector<double> raised_returns(noise_uniform_value);
+    for (double &v: raised_returns){
+        v+=0.005;
+    }
+    double sr_depressed = calculate_annualized_sortino_ratio(depressed_returns, 252, 0);
+    double sr_raised = calculate_annualized_sortino_ratio(raised_returns, 252, 0.01);
+    ASSERT_NEAR(sr, sr_depressed, 0.0001);
+    ASSERT_NEAR(sr, sr_raised, 0.0001);
+
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_17){
+    double sr = calculate_annualized_sortino_ratio(noise_uniform_value, 252, 0);
+    std::vector<double> depressed_returns(noise_uniform_value);
+    for (double &v: depressed_returns){
+        v-=0.000;
+    }
+
+    std::vector<double> raised_returns(noise_uniform_value);
+    for (double &v: raised_returns){
+        v+=0.000;
+    }
+    double sr_depressed = calculate_annualized_sortino_ratio(depressed_returns, 252, -0.001);
+    double sr_raised = calculate_annualized_sortino_ratio(raised_returns, 252, 0.001);
+    ASSERT_FALSE(std::abs(sr-sr_depressed)<0.000001);
+    ASSERT_FALSE(std::abs(sr-sr_raised)<0.000001);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_sortino_ratio_18){
+    double sr = calculate_annualized_sortino_ratio(noise_uniform_value, 252, 0.005);
+    std::vector<double> depressed_returns(noise_uniform_value);
+    for (double &v: depressed_returns){
+        v-=0.001;
+    }
+
+    std::vector<double> raised_returns(noise_uniform_value);
+    for (double &v: raised_returns){
+        v+=0.001;
+    }
+    double sr_depressed = calculate_annualized_sortino_ratio(depressed_returns, 252, 0.005);
+    double sr_raised = calculate_annualized_sortino_ratio(raised_returns, 252, 0.005);
+    ASSERT_FALSE(std::abs(sr-sr_depressed)<0.000001);
+    ASSERT_FALSE(std::abs(sr-sr_raised)<0.000001);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+

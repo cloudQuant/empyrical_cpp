@@ -9,20 +9,12 @@
 #include <numeric>
 //#include <nlopt.hpp>
 
+/*
+ * 1. implement downside_risk, not same as original ways to calculate annualised downside_risk
+ */
+
 // 定义函数 adjust_returns
 inline std::vector<double> adjust_returns(const std::vector<double>& returns, const std::vector<double>& adjustment_factor) {
-    // 判断 adjustment_factor 是否为 0
-    bool is_zero_adjustment = true;
-    for (const auto& val : adjustment_factor) {
-        if (val != 0) {
-            is_zero_adjustment = false;
-            break;
-        }
-    }
-    // 如果 adjustment_factor 为 0，则直接返回 returns
-    if (is_zero_adjustment) {
-        return returns;
-    }
     // 计算调整后的 returns
     std::vector<double> adjusted_returns;
     adjusted_returns.reserve(returns.size());
@@ -329,12 +321,16 @@ inline double calculate_annualized_sharpe_ratio(std::vector<double>& returns,
 
 inline double calculate_downside_risk(std::vector<double>& returns){
     double sum = 0.0;
+    double nan_count = 0.0;
     for (double v: returns){
         if (v<0){
             sum+=v*v;
         }
+        if (std::isnan(v)){
+            nan_count += 1.0;
+        }
     }
-    sum/=static_cast<double>(returns.size());
+    sum/=(static_cast<double>(returns.size())-nan_count);
     return std::sqrt(sum);
 }
 
@@ -342,23 +338,51 @@ inline double calculate_downside_risk(std::vector<double>& returns,
                             double required_return){
     std::vector<double> new_return = adjust_returns(returns, required_return);
     double sum = 0.0;
+    double nan_count = 0.0;
     for (double v: new_return){
         if (v<0){
             sum+=v*v;
         }
+        if (std::isnan(v)){
+            nan_count += 1.0;
+        }
     }
-    sum/=static_cast<double>(new_return.size());
+    sum/=(static_cast<double>(returns.size())-nan_count);
+    return std::sqrt(sum);
+}
+
+inline double calculate_downside_risk(const std::vector<double>& returns,
+                                      const std::vector<double>& required_return){
+    std::vector<double> new_return = adjust_returns(returns, required_return);
+    double sum = 0.0;
+    double nan_count = 0.0;
+    std::cout << "adjust_returns = [";
+    for (double v: new_return){
+        std::cout << v << std::endl;
+        if (v<0){
+            sum+=v*v;
+        }
+        if (std::isnan(v)){
+            nan_count += 1.0;
+        }
+    }
+    std::cout << "]" << std::endl;
+    sum/=(static_cast<double>(returns.size())-nan_count);
     return std::sqrt(sum);
 }
 
 inline double calculate_upside_risk(std::vector<double>& returns){
     double sum = 0.0;
+    double nan_count = 0.0;
     for (double v: returns){
-        if (v<0){
+        if (v>0){
             sum+=v*v;
         }
+        if (std::isnan(v)){
+            nan_count += 1.0;
+        }
     }
-    sum/=static_cast<double>(returns.size());
+    sum/=(static_cast<double>(returns.size())-nan_count);
     return std::sqrt(sum);
 }
 
@@ -366,12 +390,16 @@ inline double calculate_upside_risk(std::vector<double>& returns,
                                       double required_return){
     std::vector<double> new_return = adjust_returns(returns, required_return);
     double sum = 0.0;
-    for (double v: returns){
-        if (v<0){
+    double nan_count = 0.0;
+    for (double v: new_return){
+        if (v>0){
             sum+=v*v;
         }
+        if (std::isnan(v)){
+            nan_count += 1.0;
+        }
     }
-    sum/=static_cast<double>(new_return.size());
+    sum/=(static_cast<double>(returns.size())-nan_count);
     return std::sqrt(sum);
 }
 
@@ -381,14 +409,35 @@ inline double calculate_sortino_ratio(std::vector<double>& returns,
     std::size_t size = returns.size();
     if (size <= 1) {
         std::cerr << "Error: Returns vector should have at least two elements." << std::endl;
-        return 0.0;
+        return NAN;
     }
     std::vector<double> new_returns = adjust_returns(returns, riskFreeRate);
     double meanReturn = cal_func::nan_mean(new_returns);
     double now_downside_risk = calculate_downside_risk(new_returns);
 
     if (now_downside_risk > 0){
-        double sortino_ratio = (meanReturn - riskFreeRate/APPROX_BDAYS_PER_YEAR) / now_downside_risk;
+        double sortino_ratio = meanReturn  / now_downside_risk;
+        return sortino_ratio;
+    } else{
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+}
+
+inline double calculate_sortino_ratio(std::vector<double>& returns,
+                                      std::vector<double>& riskFreeRate,
+                                      std::size_t d_dof=1) {
+    std::size_t size = returns.size();
+    if (size <= 1) {
+        std::cerr << "Error: Returns vector should have at least two elements." << std::endl;
+        return NAN;
+    }
+    std::vector<double> new_returns = adjust_returns(returns, riskFreeRate);
+    double meanReturn = cal_func::nan_mean(new_returns);
+    double now_downside_risk = calculate_downside_risk(new_returns);
+
+    if (now_downside_risk > 0){
+        double sortino_ratio = meanReturn / now_downside_risk;
         return sortino_ratio;
     } else{
         return std::numeric_limits<double>::quiet_NaN();
@@ -398,8 +447,21 @@ inline double calculate_sortino_ratio(std::vector<double>& returns,
 
 inline double calculate_annualized_sortino_ratio(std::vector<double>& returns, int annualization, double riskFreeRate = 0.0) {
     if (annualization>0){
-        double sharpe_ratio = calculate_sortino_ratio(returns, riskFreeRate);
-        double annualized_sortino_ratio = sharpe_ratio * std::sqrt(annualization);
+        double sortino_ratio = calculate_sortino_ratio(returns, riskFreeRate);
+        double annualized_sortino_ratio = sortino_ratio * std::sqrt(annualization);
+        return annualized_sortino_ratio;
+    } else{
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+}
+
+inline double calculate_annualized_sortino_ratio(std::vector<double>& returns,
+                                                 int annualization,
+                                                 std::vector<double>& riskFreeRate) {
+    if (annualization>0){
+        double sortino_ratio = calculate_sortino_ratio(returns, riskFreeRate);
+        double annualized_sortino_ratio = sortino_ratio * std::sqrt(annualization);
         return annualized_sortino_ratio;
     } else{
         return std::numeric_limits<double>::quiet_NaN();
