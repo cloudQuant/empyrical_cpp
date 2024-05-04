@@ -994,3 +994,606 @@ TEST_F(OriginalStatsTest, test_excess_sharpe_5){
 //    ASSERT_TRUE(std::isnan(actual_value));
 }
 
+TEST_F(OriginalStatsTest, test_excess_sharpe_6){
+    std::vector<double> noisy_returns_1;
+    noisy_returns_1.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<250){
+            noisy_returns_1.push_back(flat_line_0_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_2;
+    noisy_returns_2.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<500){
+            noisy_returns_1.push_back(flat_line_0_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_3;
+    noisy_returns_3.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<750){
+            noisy_returns_1.push_back(flat_line_0_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+    double ir_1 = calculate_excess_sharpe_ratio(noisy_returns_1, flat_line_0_value,1);
+    double ir_2 = calculate_excess_sharpe_ratio(noisy_returns_2, flat_line_0_value,1);
+    double ir_3 = calculate_excess_sharpe_ratio(noisy_returns_3, flat_line_0_value,1);
+    ASSERT_NE(ir_1, ir_2);
+    ASSERT_NE(ir_2, ir_3);
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_7){
+    std::vector<double> noisy_returns_1;
+    noisy_returns_1.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<250){
+            noisy_returns_1.push_back(flat_line1_tz_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_2;
+    noisy_returns_2.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<500){
+            noisy_returns_1.push_back(flat_line1_tz_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_3;
+    noisy_returns_3.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<750){
+            noisy_returns_1.push_back(flat_line1_tz_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+    double ir_1 = calculate_excess_sharpe_ratio(noisy_returns_1, flat_line_0_value,1);
+    double ir_2 = calculate_excess_sharpe_ratio(noisy_returns_2, flat_line_0_value,1);
+    double ir_3 = calculate_excess_sharpe_ratio(noisy_returns_3, flat_line_0_value,1);
+    ASSERT_NE(ir_1, ir_2);
+    ASSERT_NE(ir_2, ir_3);
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_8){
+    std::vector<double> noisy_returns_1;
+    noisy_returns_1.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<250){
+            noisy_returns_1.push_back(noise_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_2;
+    noisy_returns_2.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<500){
+            noisy_returns_1.push_back(noise_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+
+    std::vector<double> noisy_returns_3;
+    noisy_returns_3.reserve(1000);
+    for (int i=0; i<1000; ++i){
+        if (i<750){
+            noisy_returns_1.push_back(noise_value[i]);
+        }else{
+            noisy_returns_1.push_back(pos_line_value[i]);
+        }
+    }
+    double ir_1 = calculate_excess_sharpe_ratio(noisy_returns_1, flat_line_0_value,1);
+    double ir_2 = calculate_excess_sharpe_ratio(noisy_returns_2, flat_line_0_value,1);
+    double ir_3 = calculate_excess_sharpe_ratio(noisy_returns_3, flat_line_0_value,1);
+    ASSERT_NE(ir_1, ir_2);
+    ASSERT_NE(ir_2, ir_3);
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_9){
+    std::vector<double> new_returns(pos_line_value);
+    for (std::size_t i=0; i<new_returns.size(); ++i){
+        new_returns[i]+=inverse_noise_value[i];
+    }
+    double sr = calculate_excess_sharpe_ratio(new_returns, pos_line_value, 1);
+    std::vector<double> depressed_returns(pos_line_value);
+    for (std::size_t i=0; i<depressed_returns.size(); ++i){
+        depressed_returns[i]+=(inverse_noise_value[i]-flat_line1_tz_value[i]);
+    }
+
+    std::vector<double> raised_returns(pos_line_value);
+    for (std::size_t i=0; i<raised_returns.size(); ++i){
+        raised_returns[i]+=(inverse_noise_value[i]+flat_line1_tz_value[i]);
+    }
+    double sr_depressed = calculate_excess_sharpe_ratio(depressed_returns, pos_line_value, 1);
+    double sr_raised = calculate_excess_sharpe_ratio(raised_returns, pos_line_value, 1);
+    ASSERT_FALSE(sr>sr_raised);
+    ASSERT_FALSE(sr_depressed>sr);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_10){
+    std::vector<double> new_returns(pos_line_value);
+    for (std::size_t i=0; i<new_returns.size(); ++i){
+        new_returns[i]+=noise_value[i];
+    }
+    double sr = calculate_excess_sharpe_ratio(new_returns, pos_line_value, 1);
+    std::vector<double> depressed_returns(pos_line_value);
+    for (std::size_t i=0; i<depressed_returns.size(); ++i){
+        depressed_returns[i]+=(noise_value[i]-flat_line1_tz_value[i]);
+    }
+
+    std::vector<double> raised_returns(pos_line_value);
+    for (std::size_t i=0; i<raised_returns.size(); ++i){
+        raised_returns[i]+=(noise_value[i]+flat_line1_tz_value[i]);
+    }
+    double sr_depressed = calculate_excess_sharpe_ratio(depressed_returns, pos_line_value, 1);
+    double sr_raised = calculate_excess_sharpe_ratio(raised_returns, pos_line_value, 1);
+    ASSERT_FALSE(sr>sr_raised);
+    ASSERT_FALSE(sr_depressed>sr);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_11){
+    std::vector<double> new_returns(neg_line_value);
+    for (std::size_t i=0; i<new_returns.size(); ++i){
+        new_returns[i]+=noise_value[i];
+    }
+    double sr = calculate_excess_sharpe_ratio(new_returns, neg_line_value, 1);
+    std::vector<double> depressed_returns(neg_line_value);
+    for (std::size_t i=0; i<depressed_returns.size(); ++i){
+        depressed_returns[i]+=(noise_value[i]-flat_line1_tz_value[i]);
+    }
+
+    std::vector<double> raised_returns(neg_line_value);
+    for (std::size_t i=0; i<raised_returns.size(); ++i){
+        raised_returns[i]+=(noise_value[i]+flat_line1_tz_value[i]);
+    }
+    double sr_depressed = calculate_excess_sharpe_ratio(depressed_returns, neg_line_value, 1);
+    double sr_raised = calculate_excess_sharpe_ratio(raised_returns, neg_line_value, 1);
+    ASSERT_FALSE(sr>sr_raised);
+    ASSERT_FALSE(sr_depressed>sr);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_excess_sharpe_12){
+    std::vector<double> new_returns(neg_line_value);
+    for (std::size_t i=0; i<new_returns.size(); ++i){
+        new_returns[i]+=inverse_noise_value[i];
+    }
+    double sr = calculate_excess_sharpe_ratio(new_returns, neg_line_value, 1);
+    std::vector<double> depressed_returns(neg_line_value);
+    for (std::size_t i=0; i<depressed_returns.size(); ++i){
+        depressed_returns[i]+=(inverse_noise_value[i]-flat_line1_tz_value[i]);
+    }
+
+    std::vector<double> raised_returns(neg_line_value);
+    for (std::size_t i=0; i<raised_returns.size(); ++i){
+        raised_returns[i]+=(inverse_noise_value[i]+flat_line1_tz_value[i]);
+    }
+    double sr_depressed = calculate_excess_sharpe_ratio(depressed_returns, neg_line_value, 1);
+    double sr_raised = calculate_excess_sharpe_ratio(raised_returns, neg_line_value, 1);
+    ASSERT_FALSE(sr>sr_raised);
+    ASSERT_FALSE(sr_depressed>sr);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_alpha_beta_1){
+    std::pair<double,double> p = calculate_alpha_beta(empty_returns_value,
+                                     simple_benchmark_value,
+                                     0);
+    double alpha_value = p.first;
+    double beta_value = p.second;
+    ASSERT_TRUE(std::isnan(alpha_value));
+    ASSERT_TRUE(std::isnan(beta_value));
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_alpha_beta_2){
+    std::pair<double,double> p = calculate_alpha_beta(one_returns_value,
+                                     one_returns_value,
+                                     0);
+    double alpha_value = p.first;
+    double beta_value = p.second;
+    ASSERT_TRUE(std::isnan(alpha_value));
+    ASSERT_TRUE(std::isnan(beta_value));
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_alpha_beta_3){
+    std::vector<double> y(mixed_returns_value);
+    y.erase(y.begin());
+    std::vector<double> x(negative_returns_value);
+    x.erase(x.begin());
+    std::pair<double,double> p = calculate_alpha_beta(y,x,0);
+    double alpha_value = p.first;
+    double beta_value = p.second;
+    std::cout << "alpha_value = " << alpha_value << std::endl;
+    std::cout << "beta_value = " << beta_value << std::endl;
+    ASSERT_NEAR(alpha_value, -0.9997853834885004, 0.000001);
+    ASSERT_NEAR(beta_value, -0.71296296296296313, 0.000001);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_alpha_beta_4){
+    std::vector<double> y(mixed_returns_value);
+    y.erase(y.begin());
+    std::vector<double> x(mixed_returns_value);
+    x.erase(x.begin());
+    std::pair<double,double> p = calculate_alpha_beta(y,x,0);
+    double alpha_value = p.first;
+    double beta_value = p.second;
+    std::cout << "alpha_value = " << alpha_value << std::endl;
+    std::cout << "beta_value = " << beta_value << std::endl;
+    ASSERT_NEAR(alpha_value, 0, 0.000001);
+    ASSERT_NEAR(beta_value, 1, 0.000001);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_alpha_beta_5){
+    std::vector<double> y(mixed_returns_value);
+    y.erase(y.begin());
+    for (double v:y){
+        std::cout << v << " ";
+    }
+    std::cout << std::endl;
+    std::vector<double> x(mixed_returns_value);
+    x.erase(x.begin());
+    for (double &v:x){
+        v=v*-1.0;
+    }
+    for (double v:x){
+        std::cout << v << " ";
+    }
+    std::pair<double,double> p = calculate_alpha_beta(y,x,0);
+    double alpha_value = p.first;
+    double beta_value = p.second;
+    std::cout << "alpha_value = " << alpha_value << std::endl;
+    std::cout << "beta_value = " << beta_value << std::endl;
+    ASSERT_NEAR(alpha_value, 0, 0.000001);
+    ASSERT_NEAR(beta_value, -1.0, 0.000001);
+//    ASSERT_NEAR(sr, sr_raised, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_alpha_1){
+
+    double alpha = calculate_alpha(empty_returns_value,
+                                   simple_benchmark_value,
+                                   0);
+
+    ASSERT_TRUE(std::isnan(alpha));
+}
+
+TEST_F(OriginalStatsTest, test_alpha_2){
+
+    double alpha = calculate_alpha(one_returns_value,
+                                   one_returns_value,
+                                   0);
+
+    ASSERT_TRUE(std::isnan(alpha));
+}
+
+TEST_F(OriginalStatsTest, test_alpha_3){
+
+    double alpha = calculate_alpha(mixed_returns_value,
+                                   flat_line_1_value,
+                                   0);
+
+    ASSERT_TRUE(std::isnan(alpha));
+}
+
+TEST_F(OriginalStatsTest, test_alpha_4){
+
+    double alpha = calculate_alpha(mixed_returns_value,
+                                   flat_line_1_value,
+                                   0);
+
+    ASSERT_TRUE(std::isnan(alpha));
+}
+
+TEST_F(OriginalStatsTest, test_alpha_5){
+    std::vector<double> new_returns(mixed_returns_value);
+    new_returns.erase(new_returns.begin());
+    double alpha = calculate_alpha(new_returns,
+                                   new_returns,
+                                   0);
+
+    ASSERT_DOUBLE_EQ(alpha, 0);
+}
+
+TEST_F(OriginalStatsTest, test_alpha_6){
+    std::vector<double> new_returns_0(mixed_returns_value);
+    new_returns_0.erase(new_returns_0.begin());
+    std::vector<double> new_returns(mixed_returns_value);
+    new_returns.erase(new_returns.begin());
+    for (double& v:mixed_returns_value){
+        v*=-1;
+    }
+    double alpha = calculate_alpha(new_returns_0,
+                                   new_returns,
+                                   0);
+
+    ASSERT_DOUBLE_EQ(alpha, 0);
+}
+
+TEST_F(OriginalStatsTest, test_alpha_beta_6){
+    std::pair<double, double> p = calculate_alpha_beta(spase_noise_value,
+                                   spase_noise_value,
+                                   0);
+    double alpha_value = p.first;
+    double beta_value = p.second;
+
+    ASSERT_TRUE(std::isnan(alpha_value));
+    ASSERT_TRUE(std::isnan(beta_value));
+}
+
+TEST_F(OriginalStatsTest, test_beta_1){
+    double beta = calculate_beta(empty_returns_value,
+                                 simple_benchmark_value);
+
+    ASSERT_TRUE(std::isnan(beta));
+}
+
+TEST_F(OriginalStatsTest, test_beta_2){
+    double beta = calculate_beta(one_returns_value,
+                                 one_returns_value);
+
+    ASSERT_TRUE(std::isnan(beta));
+}
+
+TEST_F(OriginalStatsTest, test_beta_3){
+    double beta = calculate_beta(mixed_returns_value,
+                                 flat_line_1_value);
+
+    ASSERT_TRUE(std::isnan(beta));
+}
+
+TEST_F(OriginalStatsTest, test_beta_4){
+    double beta = calculate_beta(noise_value,
+                                 noise_value);
+
+    ASSERT_NEAR(beta, 1, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_beta_5){
+    std::vector<double> new_returns(noise_value);
+    for(double &v:new_returns){
+        v*=2.0;
+    }
+    double beta = calculate_beta(new_returns,
+                                 noise_value);
+
+    ASSERT_NEAR(beta, 2, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_beta_6){
+    std::vector<double> new_returns(noise_value);
+    for(double &v:new_returns){
+        v*=2.0;
+    }
+    double beta = calculate_beta(noise_value,
+                                 inverse_noise_value);
+
+    ASSERT_NEAR(beta, -1, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_beta_7){
+    std::vector<double> new_returns(noise_value);
+    for(double &v:new_returns){
+        v*=2.0;
+    }
+    double beta = calculate_beta(new_returns,
+                                 inverse_noise_value);
+
+    ASSERT_NEAR(beta, -2, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_beta_8){
+    std::vector<double> new_returns(spase_noise_value);
+    for (std::size_t i = 0; i< new_returns.size();++i){
+       new_returns[i]*=flat_line1_tz_value[i];
+    }
+    double beta = calculate_beta(new_returns,
+                                 sparse_flat_line_1_value);
+
+    ASSERT_TRUE(std::isnan(beta));
+}
+
+TEST_F(OriginalStatsTest, test_stability_of_timeseries_1){
+
+    double actual_value = stability_of_timeseries(empty_returns_value);
+
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_stability_of_timeseries_2){
+
+    double actual_value = stability_of_timeseries(one_returns_value);
+
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_stability_of_timeseries_3){
+    std::vector<double> new_returns(mixed_returns_value);
+    new_returns.erase(new_returns.begin());
+    double actual_value = stability_of_timeseries(new_returns);
+    double expect_value = 0.1529973665111273;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_stability_of_timeseries_4){
+
+    double actual_value = stability_of_timeseries(flat_line1_tz_value);
+    double expect_value = 1;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_tail_ratio_1){
+
+    double actual_value = tail_ratio(empty_returns_value);
+    ASSERT_TRUE(std::isnan(actual_value));
+//    double expect_value = 1;
+//    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_tail_ratio_2){
+
+    double actual_value = tail_ratio(one_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 1;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_tail_ratio_3){
+    std::vector<double> new_returns(mixed_returns_value);
+    new_returns.erase(new_returns.begin());
+    for (double v:new_returns){
+        std::cout <<v << " ";
+    }
+    double actual_value = tail_ratio(new_returns);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 0.955696202531645;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_tail_ratio_4){
+    std::vector<double> new_returns = cal_func::generateRandomNormal(10000,0,1);
+    double actual_value = tail_ratio(new_returns);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 0.9473684210526313;
+    ASSERT_NEAR(actual_value, expect_value, 0.1);
+}
+
+TEST_F(OriginalStatsTest, test_annual_return_from_simple_return_1){
+    double actual_value = annual_return_from_simple_return(empty_returns_value);
+    ASSERT_TRUE(std::isnan(actual_value));
+    //double expect_value = 0.9473684210526313;
+    //ASSERT_NEAR(actual_value, expect_value, 0.1);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_2){
+    double actual_value = annual_return_from_simple_return(one_returns_value, "daily", APPROX_BDAYS_PER_YEAR);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 11.274002099240244;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_3){
+    std::vector<double> new_returns(mixed_returns_value);
+    new_returns.erase(new_returns.begin());
+    double actual_value = annual_return_from_simple_return(new_returns, "daily", APPROX_BDAYS_PER_YEAR);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 2.330292797300439;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_4){
+    double actual_value = annual_return_from_simple_return(flat_line1_tz_value, "daily", APPROX_BDAYS_PER_YEAR);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 11.274002099240256;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_5){
+    double cagr_depressed = annual_return_from_simple_return(
+            cal_func::vector_add_value(noise_value, -0.01),
+            "daily", APPROX_BDAYS_PER_YEAR);
+    double cagr_raised = annual_return_from_simple_return(
+            cal_func::vector_add_value(noise_value, 0.01),
+            "daily", APPROX_BDAYS_PER_YEAR);
+    double cagr_unchanged = annual_return_from_simple_return(
+            noise_value,
+            "daily", APPROX_BDAYS_PER_YEAR);
+    //double expect_value = 11.274002099240256;
+    ASSERT_TRUE(cagr_depressed < cagr_unchanged);
+    ASSERT_TRUE(cagr_unchanged < cagr_raised);
+    //ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_6){
+    double cagr_depressed = annual_return_from_simple_return(
+            cal_func::vector_add_value(noise_uniform_value, -0.01),
+            "daily", APPROX_BDAYS_PER_YEAR);
+    double cagr_raised = annual_return_from_simple_return(
+            cal_func::vector_add_value(noise_uniform_value, 0.01),
+            "daily", APPROX_BDAYS_PER_YEAR);
+    double cagr_unchanged = annual_return_from_simple_return(
+            noise_uniform_value,
+            "daily", APPROX_BDAYS_PER_YEAR);
+    //double expect_value = 11.274002099240256;
+    ASSERT_TRUE(cagr_depressed < cagr_unchanged);
+    ASSERT_TRUE(cagr_unchanged < cagr_raised);
+    //ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_7){
+    double actual_value = annual_return_from_simple_return(spase_noise_value, "daily", APPROX_BDAYS_PER_YEAR);
+    std::cout << "actual_value = " << actual_value << std::endl;
+//    for (double v: spase_noise_value){
+//        if (std::isnan(v)){
+//            std::cout << " v is nan " << v << std::endl;
+//        }
+//    }
+    ASSERT_FALSE(std::isnan(actual_value));
+    //double expect_value = 11.274002099240256;
+    //ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_8){
+    double cagr = annual_return_from_simple_return(pos_line_value, "daily", APPROX_BDAYS_PER_YEAR);
+    double noisy_cagr_1 = annual_return_from_simple_return(cal_func::vector_add_vector(pos_line_value,noise_value),
+                                                           "daily", APPROX_BDAYS_PER_YEAR);
+
+    double noisy_cagr_2 = annual_return_from_simple_return(cal_func::vector_minus_vector(pos_line_value,noise_value),
+                                                           "daily", APPROX_BDAYS_PER_YEAR);
+
+
+    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_9){
+    double cagr = annual_return_from_simple_return(pos_line_value, "daily", APPROX_BDAYS_PER_YEAR);
+    double noisy_cagr_1 = annual_return_from_simple_return(cal_func::vector_add_vector(pos_line_value,noise_uniform_value),
+                                                           "daily", APPROX_BDAYS_PER_YEAR);
+
+    double noisy_cagr_2 = annual_return_from_simple_return(cal_func::vector_minus_vector(pos_line_value,noise_uniform_value),
+                                                           "daily", APPROX_BDAYS_PER_YEAR);
+
+
+    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+}
+
+TEST_F(OriginalStatsTest, test_cagr_10){
+    double cagr = annual_return_from_simple_return(flat_line1_tz_value, "daily", APPROX_BDAYS_PER_YEAR);
+    std::vector<double> v1 = cal_func::vector_add_vector(flat_line1_tz_value,noise_value);
+    std::cout << "v1 size = " << v1.size() << std::endl;
+    double noisy_cagr_1 = annual_return_from_simple_return(v1,
+                                                           "daily", APPROX_BDAYS_PER_YEAR);
+
+    double noisy_cagr_2 = annual_return_from_simple_return(cal_func::vector_minus_vector(flat_line1_tz_value,noise_value),
+                                                           "daily", APPROX_BDAYS_PER_YEAR);
+
+
+    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+}
+
+
+

@@ -709,8 +709,37 @@ namespace cal_func{
         std::vector<double> result(vec);
         result[i] = NAN;
         return result;
-
-
+    }
+    // add a double value to vector
+    inline std::vector<double> vector_add_value(std::vector<double> &vec, double v){
+        std::vector<double> new_vec = vec;
+        for (double &value : new_vec){
+            value+=v;
+        }
+        return new_vec;
+    }
+    inline std::vector<double> vector_multiply_value(std::vector<double> &vec, double v){
+        std::vector<double> new_vec = vec;
+        for (double &value : vec){
+            value*=v;
+        }
+        return new_vec;
+    }
+    inline std::vector<double> vector_add_vector(std::vector<double> &v1, std::vector<double> &v2){
+        std::vector<double> result;
+        //result.reserve(v1.size());
+        for(std::size_t i=0; i<v1.size(); ++i){
+            result.push_back(v1[i]+v2[i]);
+        }
+        return result;
+    }
+    inline std::vector<double> vector_minus_vector(std::vector<double> &v1, std::vector<double> &v2){
+        std::vector<double> result;
+        //result.reserve(v1.size());
+        for(std::size_t i=0; i<v1.size(); ++i){
+            result.push_back(v1[i]-v2[i]);
+        }
+        return result;
     }
 }
 #endif // EMPYRICAL_UTILS

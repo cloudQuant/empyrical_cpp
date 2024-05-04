@@ -165,7 +165,7 @@ inline double max_drawdown_from_net_values(const std::vector<double>& net_values
 
 // 计算复利年化收益率
 inline double annual_return_from_simple_return(const std::vector<double>& returns,
-                                        const std::string & period,
+                                        const std::string & period="daily",
                                         std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()) {
     if (returns.empty()) {
         return std::numeric_limits<double>::quiet_NaN();
@@ -174,8 +174,8 @@ inline double annual_return_from_simple_return(const std::vector<double>& return
     std::size_t ann_factor = annualization_factor(period, annualization);
     double num_years = static_cast<double>(returns.size()) / static_cast<double>(ann_factor);
     double ending_value = cum_returns_final(returns, 1.0);  // 传入累积收益率
-    std::cout << "ending_value = " << ending_value << std::endl;
-    return std::pow(ending_value, 1.0 / num_years) - 1.0;
+    //return std::pow(ending_value, static_cast<double>(returns.size()) / num_years) - 1.0;
+    return std::pow(ending_value, 1 / num_years) - 1.0;
 }
 
 
@@ -212,11 +212,12 @@ inline double calmar_ratio_from_simple_return(const std::vector<double>& returns
     double max_dd = max_drawdown_from_simple_return(returns);
     std::cout << "max_dd = " << max_dd << std::endl;
     if (max_dd < 0) {
-        double temp = annual_return_from_simple_return(returns, period, annualization) / std::abs(max_dd);
+        double rate = annual_return_from_simple_return(returns, period, annualization);
+        double temp = rate / std::abs(max_dd);
         if (std::isinf(temp) || std::isnan(temp)) {
             return std::numeric_limits<double>::quiet_NaN();
         }
-        std::cout << "temp = " << temp << std::endl;
+        std::cout << "rate = " << rate << " max_dd = " << max_dd <<" temp = " << temp << std::endl;
         return temp;
     } else {
         return std::numeric_limits<double>::quiet_NaN();
@@ -511,7 +512,7 @@ inline double calculate_excess_sharpe_ratio(std::vector<double>& returns,
 
 inline double stability_of_timeseries(const std::vector<double>& returns) {
     if (returns.size() < 2) {
-        return std::nan("");
+        return NAN;
     }
 
     std::vector<double> cum_log_returns(returns.size());
@@ -560,12 +561,15 @@ inline double percentile(const std::vector<double>& arr,
 
     int k = static_cast<int>(std::floor(pos));
     double d = pos - k;
-    std::cout << "q = " << q << " k = "<< k << " d = "<< d << std::endl;
+    //std::cout <<"n = " << n << " q = " << q << " k = "<< k << " d = "<< d << std::endl;
     switch (interpolation) {
         case Interpolation::Linear:
             if (d==0.0) {
                 return sorted_arr[k];
             } else {
+                //std::cout << "sorted_arr[k] = "<<sorted_arr[k]<<std::endl;
+                //std::cout << "sorted_arr[k + 1] =" << sorted_arr[k + 1] << std::endl;
+                //std::cout << "d = " << d << std::endl;
                 return sorted_arr[k] + d * (sorted_arr[k + 1] - sorted_arr[k]);
             }
         case Interpolation::Lower:
@@ -589,8 +593,6 @@ inline double tail_ratio(const std::vector<double>& returns) {
     if (returns.empty()) {
         return std::nan("");
     }
-
-
     double right_tail = percentile(returns, 0.95);
     double left_tail = percentile(returns, 0.05);
 
@@ -858,14 +860,15 @@ inline double alpha_aligned(const std::vector<double>& returns,
 
     double alpha_sum = 0.0;
     double alpha = 0.0;
-    for (int i = 0; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         alpha = returns[i] - (beta * factor_returns[i]);
         alpha_sum += alpha;
     }
-    // todo 修改了算法，可能比原始的算法更准确
-    // double alpha_mean = alpha_sum / static_cast<double>(N);
-    // double alpha_annualized = pow(1 + alpha_mean, ann_factor) - 1;
-    double alpha_annualized = pow(1 + alpha_sum, ann_factor/N) - 1;
+
+    double alpha_mean = alpha_sum / static_cast<double>(N);
+    double alpha_annualized = pow(1 + alpha_mean, static_cast<double>(ann_factor)) - 1;
+    // todo 修改算法，可能比原始的算法更准确
+    //double alpha_annualized = pow(1 + alpha_sum, ann_factor/N) - 1;
 
     return alpha_annualized;
 }
