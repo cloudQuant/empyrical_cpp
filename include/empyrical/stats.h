@@ -5,9 +5,10 @@
 #include <numeric>
 #include "constants.h"
 #include "utils.h"
+#include "optimizer.h"
 #include <algorithm>
 #include <numeric>
-//#include <nlopt.hpp>
+
 
 /*
  * 1. implement downside_risk, not same as original ways to calculate annualised downside_risk
@@ -1020,203 +1021,189 @@ inline double calculate_beta_fragility_heuristic(const std::vector<double>& retu
 
 
 
-//double gpd_es_calculator(double var_estimate, double threshold, double scale_param, double shape_param) {
-//    double result = 0.0;
-//
-//    if ((1 - shape_param) != 0) {
-//        double var_ratio = (var_estimate / (1 - shape_param));
-//        double param_ratio = ((scale_param - (shape_param * threshold)) / (1 - shape_param));
-//        result = var_ratio + param_ratio;
-//    }
-//
-//    return result;
-//}
-//
-//double gpd_var_calculator(double threshold, double scale_param, double shape_param,
-//                          double probability, double total_n, double exceedance_n) {
-//    double result = 0.0;
-//
-//    if (exceedance_n > 0 && shape_param > 0) {
-//        double param_ratio = scale_param / shape_param;
-//        double prob_ratio = (total_n / exceedance_n) * probability;
-//        result = threshold + (param_ratio * (std::pow(prob_ratio, -shape_param) - 1));
-//    }
-//
-//    return result;
-//}
-//
-//double gpd_loglikelihood_scale_only(double scale, const std::vector<double>& price_data) {
-//    std::size_t n = price_data.size();
-//    double data_sum = 0.0;
-//    for (double price : price_data) {
-//        data_sum += price;
-//    }
-//
-//    double result = -std::numeric_limits<double>::max();
-//    if (scale >= 0) {
-//        result = (-static_cast<double> (n) * std::log(scale)) - (data_sum / scale);
-//    }
-//
-//    return result;
-//}
-//
-//// 基于尺度和形状参数的 GPD 对数似然函数计算
-//double gpd_loglikelihood_scale_and_shape(double scale, double shape, const std::vector<double>& price_data) {
-//    int n = price_data.size();
-//    double result = -std::numeric_limits<double>::max();
-//
-//    if (scale != 0) {
-//        double param_factor = shape / scale;
-//        if (shape != 0 && param_factor >= 0 && scale >= 0) {
-//            double sum_log = 0.0;
-//            for (double price : price_data) {
-//                sum_log += std::log((param_factor * price) + 1);
-//            }
-//            result = (-n * std::log(scale)) - (((1.0 / shape) + 1.0) * sum_log);
-//        }
-//    }
-//
-//    return result;
-//}
-//
-//// GPD 对数似然函数计算，根据参数类型调用不同的函数
-//double gpd_loglikelihood(const std::vector<double>& params, const std::vector<double>& price_data) {
-//    double result = 0.0;
-//
-//    if (params.size() != 2) {
-//        std::cerr << "Error: Parameters should have size 2." << std::endl;
-//        return result;
-//    }
-//
-//    if (params[1] != 0) {
-//        // 调用基于尺度和形状参数的 GPD 对数似然函数计算
-//        result = -gpd_loglikelihood_scale_and_shape(params[0], params[1], price_data);
-//    } else {
-//        // 调用仅基于尺度参数的 GPD 对数似然函数计算
-//        result = -gpd_loglikelihood_scale_only(params[0], price_data);
-//    }
-//
-//    return result;
-//}
-//
-//std::function<double(double)> gpd_loglikelihood_scale_only_factory(const std::vector<double>& price_data) {
-//    return [&price_data](double scale) {
-//        return -gpd_loglikelihood_scale_only(scale,price_data);
-//    };
-//}
-//
-//std::function<double(std::vector<double>)> gpd_loglikelihood_scale_and_shape_factory(const std::vector<double>& price_data) {
-//    return [&price_data](std::vector<double> params) {
-//        if (params.size() == 2) {
-//            return -gpd_loglikelihood_scale_and_shape(params[0], params[1], price_data);
-//        } else {
-//            // Handle invalid input
-//            return 0.0;  // Placeholder return value
-//        }
-//    };
-//}
-//
-//std::function<double(std::vector<double>)> gpd_loglikelihood_factory(const std::vector<double>& price_data) {
-//    return [&price_data](const std::vector<double>& params) {
-//        return gpd_loglikelihood(params, price_data);
-//    };
-//}
-//
-//std::vector<double> gpd_loglikelihood_minimizer_aligned(const std::vector<double> &price_data) {
-//    std::vector<double> result = {false, false};
-//    const double DEFAULT_SCALE_PARAM = 1.0;
-//    const double DEFAULT_SHAPE_PARAM = 1.0;
-//
-//    if (!price_data.empty()) {
-//        nlopt::opt opt(nlopt::LN_NELDERMEAD, 2); // Nelder-Mead optimization with 2 parameters
-//
-//        // Set objective function and data
-//        opt.set_min_objective(gpd_loglikelihood, &price_data);
-//
-//        // Set initial guess
-//        std::vector<double> x(2);
-//        x[0] = DEFAULT_SCALE_PARAM;
-//        x[1] = DEFAULT_SHAPE_PARAM;
-//        opt.set_initial_step(0.1);
-//
-//        // Set optimization options
-//        opt.set_xtol_rel(1e-6);
-//
-//        // Perform optimization
-//        double minf; // Minimum function value
-//        nlopt::result result_status = opt.optimize(x, minf);
-//
-//        if (result_status == nlopt::SUCCESS) {
-//            result[0] = x[0];
-//            result[1] = x[1];
-//        }
-//    }
-//    return result;
-//}
-//
-//std::vector<double> gpd_risk_estimates_aligned(std::vector<double>& returns, double var_p = 0.01) {
-//    std::vector<double> result(5, 0.0);
-//    if (returns.size() >= 3) {
-//        const double DEFAULT_THRESHOLD = 0.2;
-//        const double MINIMUM_THRESHOLD = 0.000000001;
-//
-//        std::vector<double> flipped_returns(returns.size());
-//        std::transform(returns.begin(), returns.end(), flipped_returns.begin(), [](double val) { return -val; });
-//
-//        std::vector<double> losses;
-//        for (double val : flipped_returns) {
-//            if (val > 0) {
-//                losses.push_back(val);
-//            }
-//        }
-//
-//        double threshold = DEFAULT_THRESHOLD;
-//        bool finished = false;
-//        double scale_param = 0.0;
-//        double shape_param = 0.0;
-//
-//        while (!finished && threshold > MINIMUM_THRESHOLD) {
-//            std::vector<double> losses_beyond_threshold;
-//            for (double loss : losses) {
-//                if (loss >= threshold) {
-//                    losses_beyond_threshold.push_back(loss);
-//                }
-//            }
-//
-//            std::vector<double> param_result = gpd_loglikelihood_minimizer_aligned(losses_beyond_threshold);
-//            if (!param_result.empty()) {
-//                scale_param = param_result[0];  // Placeholder assignment
-//                shape_param = param_result[1];  // Placeholder assignment
-//                double var_estimate = gpd_var_calculator(threshold, scale_param, shape_param, var_p,
-//                                                         losses.size(), losses_beyond_threshold.size());
-//
-//                if (shape_param > 0 && var_estimate > 0) {
-//                    finished = true;
-//                }
-//            }
-//
-//            if (!finished) {
-//                threshold /= 2;
-//            }
-//        }
-//
-//        if (finished) {
-//            double es_estimate = gpd_es_calculator(result[3], result[0], scale_param, shape_param);
-//            result = {threshold, scale_param, shape_param, result[3], es_estimate};
-//        }
-//    }
-//
-//    return result;
-//}
-//
-//std::vector<double> gpd_risk_estimates(std::vector<double>& returns, double var_p = 0.01) {
-//    if (returns.size() < 3) {
-//        std::vector<double> result(5, 0.0);
-//        return result;
-//    }
-//
-//    return gpd_risk_estimates_aligned(returns, var_p);
-//}
+inline double gpd_es_calculator(double var_estimate, double threshold, double scale_param, double shape_param) {
+    double result = 0.0;
+
+    if ((1 - shape_param) != 0) {
+        double var_ratio = (var_estimate / (1 - shape_param));
+        double param_ratio = ((scale_param - (shape_param * threshold)) / (1 - shape_param));
+        result = var_ratio + param_ratio;
+    }
+
+    return result;
+}
+
+inline double gpd_var_calculator(double threshold, double scale_param, double shape_param,
+                          double probability, double total_n, double exceedance_n) {
+    double result = 0.0;
+
+    if (exceedance_n > 0 && shape_param > 0) {
+        double param_ratio = scale_param / shape_param;
+        double prob_ratio = (total_n / exceedance_n) * probability;
+        result = threshold + (param_ratio * (std::pow(prob_ratio, -shape_param) - 1));
+    }
+
+    return result;
+}
+
+inline double gpd_loglikelihood_scale_only(double scale, const std::vector<double>& price_data) {
+    std::size_t n = price_data.size();
+    double data_sum = 0.0;
+    for (double price : price_data) {
+        data_sum += price;
+    }
+
+    double result = -std::numeric_limits<double>::max();
+    if (scale >= 0) {
+        result = (-static_cast<double> (n) * std::log(scale)) - (data_sum / scale);
+    }
+
+    return result;
+}
+
+// 基于尺度和形状参数的 GPD 对数似然函数计算
+inline double gpd_loglikelihood_scale_and_shape(double scale, double shape, const std::vector<double>& price_data) {
+    int n = price_data.size();
+    double result = -std::numeric_limits<double>::max();
+
+    if (scale != 0) {
+        double param_factor = shape / scale;
+        if (shape != 0 && param_factor >= 0 && scale >= 0) {
+            double sum_log = 0.0;
+            for (double price : price_data) {
+                sum_log += std::log((param_factor * price) + 1);
+            }
+            result = (-n * std::log(scale)) - (((1.0 / shape) + 1.0) * sum_log);
+        }
+    }
+
+    return result;
+}
+
+// GPD 对数似然函数计算，根据参数类型调用不同的函数
+inline double gpd_loglikelihood(const std::vector<double>& params, const std::vector<double>& price_data) {
+    double result = 0.0;
+
+    if (params.size() != 2) {
+        std::cerr << "Error: Parameters should have size 2." << std::endl;
+        return result;
+    }
+
+    if (params[1] != 0) {
+        // 调用基于尺度和形状参数的 GPD 对数似然函数计算
+        result = -gpd_loglikelihood_scale_and_shape(params[0], params[1], price_data);
+    } else {
+        // 调用仅基于尺度参数的 GPD 对数似然函数计算
+        result = -gpd_loglikelihood_scale_only(params[0], price_data);
+    }
+
+    return result;
+}
+
+
+
+inline double function_to_minimize(const std::array<double,2>& x) {
+    return x[0]*x[0] + x[1]*x[1];
+}
+// Gradient descent optimization
+inline std::vector<double> gpd_loglikelihood_minimizer_aligned(const std::vector<double> &price_data) {
+
+    std::vector<double> initial_params = {1.0, 1.0};
+    std::array<double,2> start = { 1.0, 1.0 };
+    std::array<double,2> step = { 0.00001, 0.00001 };
+    std::function<double(const std::array<double, 2> &)> optimized_function = [&price_data](const std::array<double, 2> &arr) {
+        return -1*gpd_loglikelihood_scale_and_shape(arr[0], arr[1], price_data);
+    };
+    nelder_mead_result<double,2> result = nelder_mead<double,2>(
+        optimized_function,
+        start,
+        1.0e-25, // the terminating limit for the variance of function values
+        step
+    );
+
+    initial_params[0] = result.xmin[0];
+    initial_params[1] = result.xmin[1];
+    cal_func::print_vector(initial_params, "initial_params");
+    return initial_params;
+}
+
+inline std::vector<double> gpd_risk_estimates_aligned(std::vector<double>& returns, double var_p = 0.01) {
+    std::vector<double> result(5, 0.0);
+    if (returns.size() >= 3) {
+        const double DEFAULT_THRESHOLD = 0.2;
+        const double MINIMUM_THRESHOLD = 0.000000001;
+
+        std::vector<double> flipped_returns(returns.size());
+        std::transform(returns.begin(), returns.end(), flipped_returns.begin(), [](double val) { return -val; });
+        std::vector<double> losses;
+        for (double val : flipped_returns) {
+            if (val > 0) {
+                losses.push_back(val);
+            }
+        }
+
+        double threshold = DEFAULT_THRESHOLD;
+        bool finished = false;
+        double var_estimate =0.0;
+        double scale_param = 0.0;
+        double shape_param = 0.0;
+
+        while (!finished && threshold > MINIMUM_THRESHOLD) {
+            std::vector<double> losses_beyond_threshold;
+            for (double loss : losses) {
+                if (loss >= threshold) {
+                    losses_beyond_threshold.push_back(loss);
+                }
+            }
+            //cal_func::print_vector(losses_beyond_threshold, "losses_beyond_threshold");
+            std::vector<double> param_result = gpd_loglikelihood_minimizer_aligned(losses_beyond_threshold);
+            //cal_func::print_vector(param_result, "param_result");
+            if (!param_result.empty()) {
+                scale_param = param_result[0];  // Placeholder assignment
+                shape_param = param_result[1];  // Placeholder assignment
+//                std::cout << "threshold = " << threshold << std::endl;
+//                std::cout << "scale_param = " << scale_param << std::endl;
+//                std::cout << "shape_param = " << shape_param << std::endl;
+//                std::cout << "var_p = " << var_p << std::endl;
+//                std::cout << "losses.size() = " << losses.size() << std::endl;
+//                std::cout << "losses_beyond_threshold.size() = " << losses_beyond_threshold.size() << std::endl;
+                var_estimate = gpd_var_calculator(threshold,
+                                                         scale_param,
+                                                         shape_param,
+                                                         var_p,
+                                                         losses.size(),
+                                                         losses_beyond_threshold.size());
+
+                std::cout << "var_estimate = " << var_estimate << std::endl;
+                if (shape_param > 0 && var_estimate > 0) {
+                    finished = true;
+                }
+            }
+
+            if (!finished) {
+                threshold /= 2;
+            }else{
+                break;
+            }
+        }
+
+        if (finished) {
+            double es_estimate = gpd_es_calculator(var_estimate, result[0], scale_param, shape_param);
+            result = {threshold, scale_param, shape_param, var_estimate, es_estimate};
+        }
+    }
+
+    return result;
+}
+
+inline std::vector<double> gpd_risk_estimates(std::vector<double>& returns, double var_p = 0.01) {
+    if (returns.size() < 3) {
+        std::vector<double> result(5, 0.0);
+        return result;
+    }
+
+    return gpd_risk_estimates_aligned(returns, var_p);
+}
 
 
 #endif // EMPYRICAL_CPP_STATS

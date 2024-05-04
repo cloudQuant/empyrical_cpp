@@ -1601,5 +1601,165 @@ TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_4){
     ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
 
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_1){
+    auto actual_value = gpd_risk_estimates(
+            one_returns_value, 0.01);
+    //ASSERT_TRUE(std::isnan(actual_value));;
+    ASSERT_NEAR(actual_value[0], 0, 0.000001);
+    ASSERT_NEAR(actual_value[1], 0, 0.000001);
+    ASSERT_NEAR(actual_value[2], 0, 0.000001);
+    ASSERT_NEAR(actual_value[3], 0, 0.000001);
+    ASSERT_NEAR(actual_value[4], 0, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_2){
+    auto actual_value = gpd_risk_estimates(
+            empty_returns_value, 0.01);
+    //ASSERT_TRUE(std::isnan(actual_value));;
+    ASSERT_NEAR(actual_value[0], 0, 0.000001);
+    ASSERT_NEAR(actual_value[1], 0, 0.000001);
+    ASSERT_NEAR(actual_value[2], 0, 0.000001);
+    ASSERT_NEAR(actual_value[3], 0, 0.000001);
+    ASSERT_NEAR(actual_value[4], 0, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_3){
+    auto actual_value = gpd_risk_estimates(
+            simple_benchmark_value, 0.01);
+    ASSERT_NEAR(actual_value[0], 0, 0.000001);
+    ASSERT_NEAR(actual_value[1], 0, 0.000001);
+    ASSERT_NEAR(actual_value[2], 0, 0.000001);
+    ASSERT_NEAR(actual_value[3], 0, 0.000001);
+    ASSERT_NEAR(actual_value[4], 0, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_4){
+    auto actual_value = gpd_risk_estimates(
+            positive_returns_value, 0.01);
+    //ASSERT_TRUE(std::isnan(actual_value));;
+    ASSERT_NEAR(actual_value[0], 0, 0.0001);
+    ASSERT_NEAR(actual_value[1], 0, 0.0001);
+    ASSERT_NEAR(actual_value[2], 0, 0.0001);
+    ASSERT_NEAR(actual_value[3], 0, 0.0001);
+    ASSERT_NEAR(actual_value[4], 0, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_5){
+    std::vector<double> result = {0.1,
+                                              0.10001255835838491,
+                                              1.5657360018514067e-06,
+                                              0.4912526273742347,
+                                              0.59126595492541179};
+    auto actual_value = gpd_risk_estimates(
+            mixed_returns_value, 0.01);
+    //ASSERT_TRUE(std::isnan(actual_value));;
+    ASSERT_NEAR(actual_value[0], result[0], 0.0001);
+    ASSERT_NEAR(actual_value[1], result[1], 0.0001);
+    ASSERT_NEAR(actual_value[2], result[2], 0.0001);
+    ASSERT_NEAR(actual_value[3], result[3], 0.0001);
+    ASSERT_NEAR(actual_value[4], result[4], 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_6){
+    std::vector<double> result = {0.1,
+                                              0.10001255835838491,
+                                              1.5657360018514067e-06,
+                                              0.4912526273742347,
+                                              0.59126595492541179};
+    auto actual_value = gpd_risk_estimates(
+            weekly_returns_value, 0.01);
+    //ASSERT_TRUE(std::isnan(actual_value));;
+    ASSERT_NEAR(actual_value[0], result[0], 0.0001);
+    ASSERT_NEAR(actual_value[1], result[1], 0.0001);
+    ASSERT_NEAR(actual_value[2], result[2], 0.0001);
+    ASSERT_NEAR(actual_value[3], result[3], 0.0001);
+    ASSERT_NEAR(actual_value[4], result[4], 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_7_1){
+    auto actual_value = gpd_es_calculator(
+            0.4912526273742347, 0.1, 0.1000125583583849, 1.5657360018514067e-06);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 0.5912659549254118;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_7_2){
+    std::vector<double> params = {0.04, 0.1};
+    auto actual_value = gpd_loglikelihood_minimizer_aligned(params);
+    ASSERT_NEAR(actual_value[0], 0.07001685730470739, 0.0001);
+    ASSERT_NEAR(actual_value[1], 7.368884693011342e-06, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_7_3){
+    double threshold = 0.1;
+    double scale_param = 0.099993;
+    double shape_param = 7.87326e-09;
+    double var_p = 0.01;
+    double losses_size = 2;
+    double losses_beyond_threshold_size = 1;
+    double var_estimate = gpd_var_calculator(threshold,
+                                             scale_param,
+                                             shape_param,
+                                             var_p,
+                                             losses_size,
+                                             losses_beyond_threshold_size);
+    double expect_var = 0.491174922064464;
+    ASSERT_NEAR(var_estimate, expect_var, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_7){
+    std::vector<double> result = {0.1,
+                                              0.10001255835838491,
+                                              1.5657360018514067e-06,
+                                              0.4912526273742347,
+                                              0.59126595492541179};
+    auto actual_value = gpd_risk_estimates(
+            monthly_returns_value, 0.01);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    std::cout << "[ ";
+    for (auto v: actual_value){
+        std::cout << v << " ";
+    }
+    std::cout << " ]" << std::endl;
+    ASSERT_NEAR(actual_value[0], result[0], 0.0001);
+    ASSERT_NEAR(actual_value[1], result[1], 0.0001);
+    ASSERT_NEAR(actual_value[2], result[2], 0.0001);
+    ASSERT_NEAR(actual_value[3], result[3], 0.0001);
+    ASSERT_NEAR(actual_value[4], result[4], 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_8){
+    std::vector<double> result = {0.1,
+                                              0.10001255835838491,
+                                              1.5657360018514067e-06,
+                                              0.4912526273742347,
+                                              0.59126595492541179};
+    auto actual_value = gpd_risk_estimates(
+            flat_line_1_value, 0.01);
+    //ASSERT_TRUE(std::isnan(actual_value));;
+    ASSERT_NEAR(actual_value[0], 0, 0.0001);
+    ASSERT_NEAR(actual_value[1], 0, 0.0001);
+    ASSERT_NEAR(actual_value[2], 0, 0.0001);
+    ASSERT_NEAR(actual_value[3], 0, 0.0001);
+    ASSERT_NEAR(actual_value[4], 0, 0.0001);
+}
+
+TEST_F(OriginalStatsTest, test_gpd_risk_estimates_9){
+    std::vector<double> result = {0.05,
+                                                 0.068353586736348199,
+                                                 9.4304947982121171e-07,
+                                                 0.34511639904932639,
+                                                 0.41347032855617882};
+    auto actual_value = gpd_risk_estimates(
+            negative_returns_value, 0.01);
+    //ASSERT_TRUE(std::isnan(actual_value));;
+    ASSERT_NEAR(actual_value[0], result[0], 0.0001);
+    ASSERT_NEAR(actual_value[1], result[1], 0.0001);
+    ASSERT_NEAR(actual_value[2], result[2], 0.0001);
+    ASSERT_NEAR(actual_value[3], result[3], 0.0001);
+    ASSERT_NEAR(actual_value[4], result[4], 0.0001);
+}
+
 
 

@@ -741,6 +741,13 @@ namespace cal_func{
         }
         return result;
     }
+    inline void print_vector(std::vector<double> &vec, const std::string& name="vector"){
+        std::cout << name << " =[ ";
+        for (double v:vec){
+            std::cout << v << " ";
+        }
+        std::cout <<" ]" << std::endl;
+    }
 }
 #endif // EMPYRICAL_UTILS
 
