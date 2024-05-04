@@ -220,8 +220,6 @@ TEST_F(OriginalStatsTest, test_cum_final_5){
 
 TEST_F(OriginalStatsTest, test_max_drawdown_1){
     double actual_value = max_drawdown_from_simple_return(empty_returns_value);
-    //double expect_value = -0.36590;
-    //ASSERT_NEAR(final_value, expect_value, 0.0001);
     ASSERT_TRUE(std::isnan(actual_value));
 }
 
@@ -388,8 +386,6 @@ TEST_F(OriginalStatsTest, test_calmar_1){
 TEST_F(OriginalStatsTest, test_calmar_2){
     double actual_value = calmar_ratio_from_simple_return(one_returns_value, DAILY);
     ASSERT_TRUE(std::isnan(actual_value));
-//    double expect_value = 0;
-//    ASSERT_NEAR(actual_value, expect_value, 0.0001);
 }
 
 TEST_F(OriginalStatsTest, test_calmar_3){
@@ -413,15 +409,11 @@ TEST_F(OriginalStatsTest, test_calmar_5){
 TEST_F(OriginalStatsTest, test_sharpe_ratio_1){
     double actual_value = calculate_annualized_sharpe_ratio(empty_returns_value, 252, 0);
     ASSERT_TRUE(std::isnan(actual_value));
-//    double expect_value = 0.52242061386048144;
-//    ASSERT_NEAR(actual_value, expect_value, 0.0001);
 }
 
 TEST_F(OriginalStatsTest, test_sharpe_ratio_2){
     double actual_value = calculate_annualized_sharpe_ratio(one_returns_value, 252, 0);
     ASSERT_TRUE(std::isnan(actual_value));
-//    double expect_value = 0.52242061386048144;
-//    ASSERT_NEAR(actual_value, expect_value, 0.0001);
 }
 
 TEST_F(OriginalStatsTest, test_sharpe_ratio_3){
@@ -764,7 +756,6 @@ TEST_F(OriginalStatsTest, test_sortino_ratio_05){
 
 TEST_F(OriginalStatsTest, test_sortino_ratio_06){
     double actual_value = calculate_annualized_sortino_ratio(positive_returns_value, APPROX_BDAYS_PER_YEAR, 0.0);
-    // ASSERT_NEAR(actual_value, expect_value, 0.0001);
     ASSERT_TRUE(std::isnan(actual_value));
 }
 
@@ -776,8 +767,6 @@ TEST_F(OriginalStatsTest, test_sortino_ratio_07){
 
 TEST_F(OriginalStatsTest, test_sortino_ratio_08){
     double actual_value = calculate_annualized_sortino_ratio(simple_benchmark_value, APPROX_BDAYS_PER_YEAR, 0);
-    //double expect_value = 0;
-    // ASSERT_NEAR(actual_value, expect_value, 0.0001);
     ASSERT_TRUE(std::isnan(actual_value));
 }
 
@@ -961,22 +950,16 @@ TEST_F(OriginalStatsTest, test_sortino_ratio_18){
 
 TEST_F(OriginalStatsTest, test_excess_sharpe_1){
     double actual_value = calculate_excess_sharpe_ratio(empty_returns_value, 0, 0);
-    //double expect_value = 0.53605626741889756;
-    //ASSERT_NEAR(actual_value, expect_value, 0.0001);
     ASSERT_TRUE(std::isnan(actual_value));
 }
 
 TEST_F(OriginalStatsTest, test_excess_sharpe_2){
     double actual_value = calculate_excess_sharpe_ratio(one_returns_value, 0, 0);
-    //double expect_value = 0.53605626741889756;
-    //ASSERT_NEAR(actual_value, expect_value, 0.0001);
     ASSERT_TRUE(std::isnan(actual_value));
 }
 
 TEST_F(OriginalStatsTest, test_excess_sharpe_3){
     double actual_value = calculate_excess_sharpe_ratio(pos_line_value, pos_line_value, 0);
-    //double expect_value = 0.53605626741889756;
-    //ASSERT_NEAR(actual_value, expect_value, 0.0001);
     ASSERT_TRUE(std::isnan(actual_value));
 }
 
@@ -1447,8 +1430,6 @@ TEST_F(OriginalStatsTest, test_tail_ratio_1){
 
     double actual_value = tail_ratio(empty_returns_value);
     ASSERT_TRUE(std::isnan(actual_value));
-//    double expect_value = 1;
-//    ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
 
 TEST_F(OriginalStatsTest, test_tail_ratio_2){
@@ -1482,8 +1463,6 @@ TEST_F(OriginalStatsTest, test_tail_ratio_4){
 TEST_F(OriginalStatsTest, test_annual_return_from_simple_return_1){
     double actual_value = annual_return_from_simple_return(empty_returns_value);
     ASSERT_TRUE(std::isnan(actual_value));
-    //double expect_value = 0.9473684210526313;
-    //ASSERT_NEAR(actual_value, expect_value, 0.1);
 }
 
 TEST_F(OriginalStatsTest, test_cagr_2){
@@ -1522,7 +1501,6 @@ TEST_F(OriginalStatsTest, test_cagr_5){
     //double expect_value = 11.274002099240256;
     ASSERT_TRUE(cagr_depressed < cagr_unchanged);
     ASSERT_TRUE(cagr_unchanged < cagr_raised);
-    //ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
 
 TEST_F(OriginalStatsTest, test_cagr_6){
@@ -1538,7 +1516,7 @@ TEST_F(OriginalStatsTest, test_cagr_6){
     //double expect_value = 11.274002099240256;
     ASSERT_TRUE(cagr_depressed < cagr_unchanged);
     ASSERT_TRUE(cagr_unchanged < cagr_raised);
-    //ASSERT_NEAR(actual_value, expect_value, 0.000001);
+
 }
 
 TEST_F(OriginalStatsTest, test_cagr_7){
@@ -1550,8 +1528,6 @@ TEST_F(OriginalStatsTest, test_cagr_7){
 //        }
 //    }
     ASSERT_FALSE(std::isnan(actual_value));
-    //double expect_value = 11.274002099240256;
-    //ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
 
 TEST_F(OriginalStatsTest, test_cagr_8){
@@ -1564,7 +1540,7 @@ TEST_F(OriginalStatsTest, test_cagr_8){
 
 
     ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
-    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+    ASSERT_NEAR(cagr/noisy_cagr_2, 1, 0.1);
 }
 
 TEST_F(OriginalStatsTest, test_cagr_9){
@@ -1577,7 +1553,7 @@ TEST_F(OriginalStatsTest, test_cagr_9){
 
 
     ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
-    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+    ASSERT_NEAR(cagr/noisy_cagr_2, 1, 0.1);
 }
 
 TEST_F(OriginalStatsTest, test_cagr_10){
@@ -1592,7 +1568,37 @@ TEST_F(OriginalStatsTest, test_cagr_10){
 
 
     ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
-    ASSERT_NEAR(cagr/noisy_cagr_1, 1, 0.1);
+    ASSERT_NEAR(cagr/noisy_cagr_2, 1, 0.1);
+}
+
+TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_1){
+    double actual_value = calculate_beta_fragility_heuristic(
+            one_returns_value, one_returns_value);
+    ASSERT_TRUE(std::isnan(actual_value));
+}
+
+TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_2){
+    double actual_value = calculate_beta_fragility_heuristic(
+            positive_returns_value, simple_benchmark_value);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 0;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_3){
+    double actual_value = calculate_beta_fragility_heuristic(
+            mixed_returns_value, simple_benchmark_value);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = 0.09;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_4){
+    double actual_value = calculate_beta_fragility_heuristic(
+            negative_returns_value, simple_benchmark_value);
+    //ASSERT_TRUE(std::isnan(actual_value));
+    double expect_value = -0.029999999999999999;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
 
 

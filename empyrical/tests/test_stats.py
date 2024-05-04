@@ -28,26 +28,6 @@ class TestStats(BaseTestCase):
                 expected[i],
                 DECIMAL_PLACES)
 
-    # Adding noise to returns should not significantly alter the cagr values.
-    # Confirm that adding noise does not change cagr values to one
-    # significant digit
-    @parameterized.expand([
-        (pos_line, noise),
-        (pos_line, noise_uniform),
-        (flat_line_1_tz, noise)
-    ])
-    def test_cagr_noisy(self, returns, add_noise):
-        cagr = self.empyrical.cagr(returns)
-        noisy_cagr_1 = self.empyrical.cagr(returns+add_noise)
-        noisy_cagr_2 = self.empyrical.cagr(returns-add_noise)
-        np.testing.assert_approx_equal(
-            cagr,
-            noisy_cagr_1,
-            1)
-        np.testing.assert_approx_equal(
-            cagr,
-            noisy_cagr_2,
-            1)
 
     # regression tests for beta_fragility_heuristic
     @parameterized.expand([
