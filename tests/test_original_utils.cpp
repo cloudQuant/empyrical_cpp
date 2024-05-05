@@ -1761,5 +1761,43 @@ TEST_F(OriginalStatsTest, test_gpd_risk_estimates_9){
     ASSERT_NEAR(actual_value[4], result[4], 0.0001);
 }
 
+TEST_F(OriginalStatsTest, test_roll_max_drawdown_1){
+    auto actual_value = roll_max_drawdown(
+            empty_returns_value, 6);
+    ASSERT_TRUE(std::isnan(actual_value[0]));
+    //double expect_value = 0.5912659549254118;
+    //ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_roll_max_drawdown_1_1){
+    std::vector<double> ret = {0.  , -0.06, -0.07, -0.01, -0.09, -0.02};
+    auto actual_value = max_drawdown_from_simple_return(
+            ret);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    double expect_value = -0.22818455560000003;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_roll_max_drawdown_1_2){
+    std::vector<double> ret = {-0.06, -0.07, -0.01, -0.09, -0.02, -0.06};
+    auto actual_value = max_drawdown_from_simple_return(
+            ret);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    double expect_value = -0.27449348226400005;
+    ASSERT_NEAR(actual_value, expect_value, 0.000001);
+}
+
+TEST_F(OriginalStatsTest, test_roll_max_drawdown_2){
+    auto actual_value = roll_max_drawdown(
+            negative_returns_value, 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {-0.2282, -0.2745, -0.2899, -0.2747};
+    for (std::size_t i=0; i< expect_value.size(); ++i){
+        std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.0001);
+    }
+
+}
+
 
 

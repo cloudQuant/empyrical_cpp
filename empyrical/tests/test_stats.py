@@ -29,18 +29,7 @@ class TestStats(BaseTestCase):
                 DECIMAL_PLACES)
 
 
-    @parameterized.expand([
-        (empty_returns, 6, []),
-        (negative_returns, 6, [-0.2282, -0.2745, -0.2899, -0.2747])
-    ])
-    def test_roll_max_drawdown(self, returns, window, expected):
-        test = self.empyrical.roll_max_drawdown(returns, window=window)
-        assert_almost_equal(
-            np.asarray(test),
-            np.asarray(expected),
-            4)
 
-        self.assert_indexes_match(test, returns[-len(expected):])
 
     @parameterized.expand([
         (empty_returns, 6, []),

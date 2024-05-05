@@ -718,9 +718,9 @@ inline std::vector<double> roll_up_capture(std::vector<double>& returns,
     for (std::size_t i = window; i < size; ++i) {
         // 滑动窗口移除第一个元素，添加新元素
         new_returns.erase(new_returns.begin());
-        new_returns.push_back(new_returns[i]);
+        new_returns.push_back(returns[i]);
         new_factor_returns.erase(new_factor_returns.begin());
-        new_factor_returns.push_back(new_factor_returns[i]);
+        new_factor_returns.push_back(factor_returns[i]);
         v = up_capture(new_returns, new_factor_returns, period, annualization);
         data.push_back(v);
     }
@@ -749,9 +749,9 @@ inline std::vector<double> roll_down_capture(std::vector<double>& returns,
     for (std::size_t i = window; i < size; ++i) {
         // 滑动窗口移除第一个元素，添加新元素
         new_returns.erase(new_returns.begin());
-        new_returns.push_back(new_returns[i]);
+        new_returns.push_back(returns[i]);
         new_factor_returns.erase(new_factor_returns.begin());
-        new_factor_returns.push_back(new_factor_returns[i]);
+        new_factor_returns.push_back(factor_returns[i]);
         v = up_capture(new_returns, new_factor_returns, period, annualization);
         data.push_back(v);
     }
@@ -780,9 +780,9 @@ inline std::vector<double> roll_up_down_capture(std::vector<double>& returns,
     for (std::size_t i = window; i < size; ++i) {
         // 滑动窗口移除第一个元素，添加新元素
         new_returns.erase(new_returns.begin());
-        new_returns.push_back(new_returns[i]);
+        new_returns.push_back(returns[i]);
         new_factor_returns.erase(new_factor_returns.begin());
-        new_factor_returns.push_back(new_factor_returns[i]);
+        new_factor_returns.push_back(factor_returns[i]);
         v = up_capture(new_returns, new_factor_returns, period, annualization);
         data.push_back(v);
     }
@@ -927,9 +927,9 @@ inline std::vector<std::pair<double, double>> roll_alpha_beta(std::vector<double
     for (std::size_t i = window; i < size; ++i) {
         // 滑动窗口移除第一个元素，添加新元素
         new_returns.erase(new_returns.begin());
-        new_returns.push_back(new_returns[i]);
+        new_returns.push_back(returns[i]);
         new_factor_returns.erase(new_factor_returns.begin());
-        new_factor_returns.push_back(new_factor_returns[i]);
+        new_factor_returns.push_back(factor_returns[i]);
         v = calculate_alpha_beta(new_returns, new_factor_returns, risk_free, period, annualization);
         data.push_back(v);
     }
@@ -1203,6 +1203,32 @@ inline std::vector<double> gpd_risk_estimates(std::vector<double>& returns, doub
     }
 
     return gpd_risk_estimates_aligned(returns, var_p);
+}
+
+inline std::vector<double> roll_max_drawdown(const std::vector<double>& returns, int window) {
+    if (static_cast<double>(returns.size()) < static_cast<double>(window)) {
+        std::vector<double> result = {NAN};
+        return result;
+    } else {
+        std::vector<double> new_returns(returns.begin(), returns.begin() + window);
+        //cal_func::print_vector(new_returns, "new_returns");
+        std::vector<double> data;
+        std::size_t size = returns.size();
+        data.reserve(size - window + 1);  // 提前预留空间
+        double v = max_drawdown_from_simple_return(new_returns);
+        data.push_back(v);
+
+        // 滑动窗口计算后续值
+        for (std::size_t i = window; i < size; ++i) {
+            // 滑动窗口移除第一个元素，添加新元素
+            new_returns.erase(new_returns.begin());
+            new_returns.push_back(returns[i]);
+            //cal_func::print_vector(new_returns, "new_returns");
+            v = max_drawdown_from_simple_return(new_returns);
+            data.push_back(v);
+        }
+        return data;
+    }
 }
 
 
