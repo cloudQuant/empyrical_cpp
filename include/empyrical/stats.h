@@ -659,7 +659,7 @@ inline std::pair<std::vector<double>,
     for (std::size_t i=0; i<size;i++){
         if (factor_returns[i] < 0){
             new_returns.push_back(returns[i]);
-            factor_returns.push_back(factor_returns[i]);
+            new_factor_returns.push_back(factor_returns[i]);
         }
     }
     return std::make_pair(new_returns, new_factor_returns);
@@ -682,11 +682,15 @@ inline double down_capture(std::vector<double>& returns,
                   std::vector<double>&factor_returns,
                   const std::string& period="daily",
                   std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
+//    cal_func::print_vector(returns, "returns");
+//    cal_func::print_vector(factor_returns, "factor_returns");
     auto result = only_down(returns, factor_returns);
     std::vector<double> new_returns = result.first;
     std::vector<double> new_factor_returns = result.second;
+    cal_func::print_vector(new_factor_returns, "new_factor_returns");
     double a = annual_return_from_simple_return(new_returns,period,annualization);
     double b = annual_return_from_simple_return(new_factor_returns,period,annualization);
+    std::cout << "a = " << a << " b = " << b << std::endl;
     return a/b;
 }
 
@@ -908,21 +912,24 @@ inline std::pair<double, double> calculate_alpha_beta(const std::vector<double>&
 
 inline std::vector<std::pair<double, double>> roll_alpha_beta(std::vector<double>& returns,
                                          std::vector<double>&factor_returns,
-                                         int window=10,double risk_free = 0.0,
+                                         int window=10, double risk_free = 0.0,
                                          const std::string& period="daily",
                                          int annualization = 252){
 
     std::vector<std::pair<double, double>> data;
+    if (returns.size() != factor_returns.size()){
+        std::cout << "长度不一致" << std::endl;
+        return data;
+    }
     std::size_t size = returns.size();
     data.reserve(size - window + 1);  // 提前预留空间
 
     // 初始化窗口数据
     std::vector<double> new_returns(returns.begin(), returns.begin() + window);
-    std::vector<double> new_factor_returns(returns.begin(), returns.begin() + window);
+    std::vector<double> new_factor_returns(factor_returns.begin(), factor_returns.begin() + window);
     // 计算初始窗口的值
     std::pair<double, double> v = calculate_alpha_beta(new_returns, new_factor_returns, risk_free, period, annualization);
     data.push_back(v);
-
     // 滑动窗口计算后续值
     for (std::size_t i = window; i < size; ++i) {
         // 滑动窗口移除第一个元素，添加新元素
@@ -1230,6 +1237,34 @@ inline std::vector<double> roll_max_drawdown(const std::vector<double>& returns,
         return data;
     }
 }
+
+inline std::vector<double> roll_sharpe_ratio(const std::vector<double>& returns, int window, int annualization, double riskFreeRate = 0.0) {
+    if (static_cast<double>(returns.size()) < static_cast<double>(window)) {
+        std::vector<double> result = {NAN};
+        return result;
+    } else {
+        std::vector<double> new_returns(returns.begin(), returns.begin() + window);
+        //cal_func::print_vector(new_returns, "new_returns");
+        std::vector<double> data;
+        std::size_t size = returns.size();
+        data.reserve(size - window + 1);  // 提前预留空间
+        double v = calculate_annualized_sharpe_ratio(new_returns, annualization, riskFreeRate);
+        data.push_back(v);
+
+        // 滑动窗口计算后续值
+        for (std::size_t i = window; i < size; ++i) {
+            // 滑动窗口移除第一个元素，添加新元素
+            new_returns.erase(new_returns.begin());
+            new_returns.push_back(returns[i]);
+            //cal_func::print_vector(new_returns, "new_returns");
+            v = calculate_annualized_sharpe_ratio(new_returns, annualization, riskFreeRate);
+            data.push_back(v);
+        }
+        return data;
+    }
+}
+
+
 
 
 #endif // EMPYRICAL_CPP_STATS

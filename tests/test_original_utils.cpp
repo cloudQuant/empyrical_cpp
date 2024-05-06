@@ -1799,5 +1799,263 @@ TEST_F(OriginalStatsTest, test_roll_max_drawdown_2){
 
 }
 
+TEST_F(OriginalStatsTest, test_roll_sharpe_ratio_1){
+    auto actual_value = roll_sharpe_ratio(
+            empty_returns_value, 6, 252, 0);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {NAN};
+    for (std::size_t i=0; i< expect_value.size(); ++i){
+        std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        // ASSERT_NEAR(actual_value[i], expect_value[i], 0.0001);
+        ASSERT_TRUE(std::isnan(actual_value[0]));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_roll_sharpe_ratio_2){
+    auto actual_value = roll_sharpe_ratio(
+            negative_returns_value, 6, 252, 0);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {-18.09162052, -26.79897486, -26.69138263,
+                                        -25.72298838};
+    for (std::size_t i=0; i< expect_value.size(); ++i){
+        std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.0001);
+        //ASSERT_TRUE(std::isnan(actual_value[0]));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_roll_sharpe_ratio_3){
+    auto actual_value = roll_sharpe_ratio(
+            mixed_returns_value, 6, 252, 0);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {7.57445259, 8.22784105, 8.22784105, -3.1374751};
+    for (std::size_t i=0; i< expect_value.size(); ++i){
+        std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.0001);
+        //ASSERT_TRUE(std::isnan(actual_value[0]));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_capture_ratio_1){
+    auto actual_value = capture(empty_returns_value, empty_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {NAN};
+    for (std::size_t i=0; i< expect_value.size(); ++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_NEAR(actual_value[i], expect_value[i], 0.0001);
+        ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_capture_ratio_2){
+    auto actual_value = capture(one_returns_value, one_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {1};
+    for (double i : expect_value){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value, i, 0.0001);
+        //ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_capture_ratio_3){
+    auto actual_value = capture(mixed_returns_value, mixed_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {1.0};
+    for (double i : expect_value){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value, i, 0.0001);
+        //ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_capture_ratio_4){
+    auto actual_value = capture(all_negative_returns_value, mixed_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {-0.52257643222960259};
+    for (double i : expect_value){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value, i, 0.0001);
+        //ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_down_capture_1){
+    auto actual_value = down_capture(empty_returns_value, empty_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {NAN};
+    for (std::size_t i=0; i< expect_value.size(); ++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_NEAR(actual_value, expect_value[i], 0.0001);
+        ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_down_capture_2){
+    auto actual_value = down_capture(one_returns_value, one_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {NAN};
+    for (std::size_t i=0; i< expect_value.size(); ++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_NEAR(actual_value, expect_value[i], 0.0001);
+        ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_down_capture_3){
+    auto actual_value = down_capture(mixed_returns_value, mixed_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {1.0};
+    for (double i : expect_value){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value, i, 0.0001);
+        //ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_down_capture_4){
+    auto actual_value = down_capture(all_negative_returns_value, mixed_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {0.99956025703798634};
+    for (double i : expect_value){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value, i, 0.0001);
+        //ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_down_capture_5){
+    auto actual_value = down_capture(positive_returns_value, mixed_returns_value);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {-11.27400221};
+    for (double i : expect_value){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_NEAR(actual_value, i, 0.0001);
+        //ASSERT_TRUE(std::isnan(actual_value));
+    }
+
+}
+
+TEST_F(OriginalStatsTest, test_roll_alpha_beta_1){
+    auto actual_value = roll_alpha_beta(empty_returns_value, simple_benchmark_value, 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value;
+    for (auto i : actual_value){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        // ASSERT_NEAR(actual_value, i, 0.0001);
+        ASSERT_TRUE(std::isnan(i.first));
+        ASSERT_TRUE(std::isnan(i.second));
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_alpha_beta_2){
+    auto actual_value = roll_alpha_beta(one_returns_value, one_returns_value, 1);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value;
+    for (auto i : actual_value){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        // ASSERT_NEAR(actual_value, i, 0.0001);
+        ASSERT_TRUE(std::isnan(i.first));
+        ASSERT_TRUE(std::isnan(i.second));
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_alpha_beta_3){
+    std::vector<double> new_returns1(mixed_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(negative_returns_value);
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_alpha_beta(new_returns1, new_returns2, 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<std::vector<double>> expect_value;
+    expect_value.push_back({NAN, NAN});
+    expect_value.push_back({-0.9828927, -0.76156584});
+    expect_value.push_back({-0.93166924, -0.61682243});
+    expect_value.push_back({-0.99967288, -0.41311475});
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        std::cout << actual_value[i].first << actual_value[i].second << std::endl;
+        if (i==0){
+            ASSERT_TRUE(std::isnan(actual_value[i].first));
+            ASSERT_TRUE(std::isnan(actual_value[i].second));
+        }
+        else{
+            ASSERT_NEAR(actual_value[i].first, expect_value[i][0], 0.0001);
+            ASSERT_NEAR(actual_value[i].second, expect_value[i][1], 0.0001);
+        }
+
+
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_alpha_beta_4){
+    std::vector<double> new_returns1(mixed_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_alpha_beta(new_returns1, new_returns2, 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<std::vector<double>> expect_value;
+    expect_value.push_back({NAN, NAN});
+    expect_value.push_back({0, 1});
+    expect_value.push_back({0,1});
+    expect_value.push_back({0,1});
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        std::cout << actual_value[i].first << actual_value[i].second << std::endl;
+        if (i==0){
+            ASSERT_TRUE(std::isnan(actual_value[i].first));
+            ASSERT_TRUE(std::isnan(actual_value[i].second));
+        }
+        else{
+            ASSERT_NEAR(actual_value[i].first, expect_value[i][0], 0.0001);
+            ASSERT_NEAR(actual_value[i].second, expect_value[i][1], 0.0001);
+        }
+
+
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_alpha_beta_5){
+    std::vector<double> new_returns1(mixed_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    std::transform(mixed_returns_value.begin(), mixed_returns_value.end(), new_returns2.begin(),
+                   [](double val) { return -val; });
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_alpha_beta(new_returns1, new_returns2, 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<std::vector<double>> expect_value;
+    expect_value.push_back({NAN, NAN});
+    expect_value.push_back({0, -1});
+    expect_value.push_back({0, -1});
+    expect_value.push_back({0, -1});
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        std::cout << actual_value[i].first << actual_value[i].second << std::endl;
+        if (i==0){
+            ASSERT_TRUE(std::isnan(actual_value[i].first));
+            ASSERT_TRUE(std::isnan(actual_value[i].second));
+        }
+        else{
+            ASSERT_NEAR(actual_value[i].first, expect_value[i][0], 0.0001);
+            ASSERT_NEAR(actual_value[i].second, expect_value[i][1], 0.0001);
+        }
+
+
+    }
+}
+
 
 
