@@ -644,7 +644,7 @@ inline std::pair<std::vector<double>,
         for (std::size_t i=0; i<size;i++){
             if (factor_returns[i] > 0){
                 new_returns.push_back(returns[i]);
-                factor_returns.push_back(factor_returns[i]);
+                new_factor_returns.push_back(factor_returns[i]);
             }
         }
         return std::make_pair(new_returns, new_factor_returns);
@@ -670,11 +670,15 @@ inline double up_capture(std::vector<double>& returns,
                   std::vector<double>&factor_returns,
                   const std::string& period="daily",
                   std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
+    cal_func::print_vector(returns, "returns");
+    cal_func::print_vector(factor_returns, "factor_returns");
     auto result = only_up(returns, factor_returns);
-    std::vector<double> new_returns = result.first;
-    std::vector<double> new_factor_returns = result.second;
-    double a = annual_return_from_simple_return(new_returns,period,annualization);
-    double b = annual_return_from_simple_return(new_factor_returns,period,annualization);
+    std::vector<double> new_returns1 = result.first;
+    std::vector<double> new_factor_returns1 = result.second;
+    cal_func::print_vector(new_returns1, "new_returns");
+    cal_func::print_vector(new_factor_returns1, "new_factor_returns");
+    double a = annual_return_from_simple_return(new_returns1,period,annualization);
+    double b = annual_return_from_simple_return(new_factor_returns1,period,annualization);
     return a/b;
 }
 
@@ -682,15 +686,17 @@ inline double down_capture(std::vector<double>& returns,
                   std::vector<double>&factor_returns,
                   const std::string& period="daily",
                   std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
-//    cal_func::print_vector(returns, "returns");
-//    cal_func::print_vector(factor_returns, "factor_returns");
+
+    cal_func::print_vector(returns, "returns");
+    cal_func::print_vector(factor_returns, "factor_returns");
     auto result = only_down(returns, factor_returns);
-    std::vector<double> new_returns = result.first;
-    std::vector<double> new_factor_returns = result.second;
-    cal_func::print_vector(new_factor_returns, "new_factor_returns");
-    double a = annual_return_from_simple_return(new_returns,period,annualization);
-    double b = annual_return_from_simple_return(new_factor_returns,period,annualization);
-    std::cout << "a = " << a << " b = " << b << std::endl;
+    std::vector<double> new_returns1 = result.first;
+    std::vector<double> new_factor_returns1 = result.second;
+    cal_func::print_vector(new_returns1, "new_returns");
+    cal_func::print_vector(new_factor_returns1, "new_factor_returns");
+    double a = annual_return_from_simple_return(new_returns1,period,annualization);
+    double b = annual_return_from_simple_return(new_factor_returns1,period,annualization);
+    std::cout << "a = " << a << " b =" << b << std::endl;
     return a/b;
 }
 
@@ -698,7 +704,9 @@ inline double up_down_capture(std::vector<double>& returns,
                         std::vector<double>&factor_returns,
                         const std::string& period="daily",
                         std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
-    return up_capture(returns,factor_returns,period,annualization)/down_capture(returns,factor_returns,period,annualization);
+    double a = up_capture(returns,factor_returns,period,annualization);
+    double b = down_capture(returns,factor_returns,period,annualization);
+    return a/b;
 }
 
 inline std::vector<double> roll_up_capture(std::vector<double>& returns,
@@ -708,12 +716,16 @@ inline std::vector<double> roll_up_capture(std::vector<double>& returns,
                        std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
 
     std::vector<double> data;
+    if (returns.size() < window || returns.size()!=factor_returns.size()){
+        data.push_back(NAN);
+        return data;
+    }
     std::size_t size = returns.size();
     data.reserve(size - window + 1);  // 提前预留空间
 
     // 初始化窗口数据
     std::vector<double> new_returns(returns.begin(), returns.begin() + window);
-    std::vector<double> new_factor_returns(returns.begin(), returns.begin() + window);
+    std::vector<double> new_factor_returns(factor_returns.begin(), factor_returns.begin() + window);
     // 计算初始窗口的值
     double v = up_capture(new_returns, new_factor_returns, period, annualization);
     data.push_back(v);
@@ -728,7 +740,6 @@ inline std::vector<double> roll_up_capture(std::vector<double>& returns,
         v = up_capture(new_returns, new_factor_returns, period, annualization);
         data.push_back(v);
     }
-
     return data;
 }
 
@@ -739,12 +750,16 @@ inline std::vector<double> roll_down_capture(std::vector<double>& returns,
                                     std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
 
     std::vector<double> data;
+    if (returns.size() < window || returns.size()!= factor_returns.size()){
+        data.push_back(NAN);
+        return data;
+    }
     std::size_t size = returns.size();
     data.reserve(size - window + 1);  // 提前预留空间
 
     // 初始化窗口数据
     std::vector<double> new_returns(returns.begin(), returns.begin() + window);
-    std::vector<double> new_factor_returns(returns.begin(), returns.begin() + window);
+    std::vector<double> new_factor_returns(factor_returns.begin(), factor_returns.begin() + window);
     // 计算初始窗口的值
     double v = down_capture(new_returns, new_factor_returns, period, annualization);
     data.push_back(v);
@@ -756,7 +771,7 @@ inline std::vector<double> roll_down_capture(std::vector<double>& returns,
         new_returns.push_back(returns[i]);
         new_factor_returns.erase(new_factor_returns.begin());
         new_factor_returns.push_back(factor_returns[i]);
-        v = up_capture(new_returns, new_factor_returns, period, annualization);
+        v = down_capture(new_returns, new_factor_returns, period, annualization);
         data.push_back(v);
     }
 
@@ -770,12 +785,18 @@ inline std::vector<double> roll_up_down_capture(std::vector<double>& returns,
                                       std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
 
     std::vector<double> data;
+    if (returns.size() < window || returns.size() != factor_returns.size()){
+        data.push_back(NAN);
+        return data;
+    }
     std::size_t size = returns.size();
     data.reserve(size - window + 1);  // 提前预留空间
 
     // 初始化窗口数据
     std::vector<double> new_returns(returns.begin(), returns.begin() + window);
-    std::vector<double> new_factor_returns(returns.begin(), returns.begin() + window);
+    std::vector<double> new_factor_returns(factor_returns.begin(), factor_returns.begin() + window);
+    cal_func::print_vector(new_returns, "new_returns0");
+    cal_func::print_vector(new_factor_returns, "new_factor_returns0");
     // 计算初始窗口的值
     double v = up_down_capture(new_returns, new_factor_returns, period, annualization);
     data.push_back(v);
@@ -783,11 +804,13 @@ inline std::vector<double> roll_up_down_capture(std::vector<double>& returns,
     // 滑动窗口计算后续值
     for (std::size_t i = window; i < size; ++i) {
         // 滑动窗口移除第一个元素，添加新元素
+        cal_func::print_vector(new_returns, "new_returns");
+        cal_func::print_vector(new_factor_returns, "new_factor_returns");
         new_returns.erase(new_returns.begin());
         new_returns.push_back(returns[i]);
         new_factor_returns.erase(new_factor_returns.begin());
         new_factor_returns.push_back(factor_returns[i]);
-        v = up_capture(new_returns, new_factor_returns, period, annualization);
+        v = up_down_capture(new_returns, new_factor_returns, period, annualization);
         data.push_back(v);
     }
 

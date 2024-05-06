@@ -2057,5 +2057,252 @@ TEST_F(OriginalStatsTest, test_roll_alpha_beta_5){
     }
 }
 
+TEST_F(OriginalStatsTest, test_roll_up_down_capture_1){
+    std::vector<double> new_returns1(empty_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(empty_returns_value);
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_down_capture(new_returns1, new_returns2, "daily", 1);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value;
+    expect_value.push_back({NAN});
+//    expect_value.push_back({0, -1});
+//    expect_value.push_back({0, -1});
+//    expect_value.push_back({0, -1});
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_TRUE(std::isnan(actual_value[i]));
+
+
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_up_down_capture_2){
+    std::vector<double> new_returns1(one_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(one_returns_value);
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_down_capture(new_returns1, new_returns2, "daily", 1);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value;
+    expect_value.push_back({NAN});
+//    expect_value.push_back({0, -1});
+//    expect_value.push_back({0, -1});
+//    expect_value.push_back({0, -1});
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_TRUE(std::isnan(actual_value[i]));
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_up_down_capture_3){
+    std::vector<double> new_returns1(mixed_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_down_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {1,1,1};
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        // ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_up_down_capture_4){
+    std::vector<double> new_returns1(positive_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_down_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = { -0.00025861, -0.00015211, -0.00689239};
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        // ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_up_down_capture_5){
+    std::vector<double> new_returns1(all_negative_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_down_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {-1.65241701e-04, -1.65241719e-04,
+                                        -6.89541957e-03};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        // ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_down_capture_1){
+    std::vector<double> new_returns1(empty_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(empty_returns_value);
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 1);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {NAN};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_TRUE(std::isnan(actual_value[i]));
+        //ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_down_capture_2){
+    std::vector<double> new_returns1(one_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(one_returns_value);
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 1);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {NAN};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_TRUE(std::isnan(actual_value[i]));
+        //ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_down_capture_3){
+    std::vector<double> new_returns1(mixed_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {1,1,1};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_down_capture_4){
+    std::vector<double> new_returns1(positive_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {-11.2743862, -11.2743862, -11.27400221};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_down_capture_5){
+    std::vector<double> new_returns1(all_negative_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {0.92058591, 0.92058591, 0.99956026};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+
+TEST_F(OriginalStatsTest, test_roll_up_capture_1){
+    std::vector<double> new_returns1(empty_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(empty_returns_value);
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 1);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {NAN};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        ASSERT_TRUE(std::isnan(actual_value[i]));
+        //ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_up_capture_2){
+    std::vector<double> new_returns1(one_returns_value);
+    //new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(one_returns_value);
+    //new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 1);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {1};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_up_capture_3){
+    std::vector<double> new_returns1(mixed_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {1,1,1};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_up_capture_4){
+    std::vector<double> new_returns1(positive_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {0.00291564, 0.00171499, 0.0777048};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_roll_up_capture_5){
+    std::vector<double> new_returns1(all_negative_returns_value);
+    new_returns1.erase(new_returns1.begin());
+    std::vector<double> new_returns2(mixed_returns_value);
+    new_returns2.erase(new_returns2.begin());
+    auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 6);
+    //ASSERT_TRUE(std::isnan(actual_value[0]));
+    std::vector<double> expect_value = {-1.52119182e-04, -1.52119198e-04,
+                                        -6.89238735e-03};
+    cal_func::print_vector(actual_value, "actual_value");
+    for (std::size_t i=0;i<expect_value.size();++i){
+        //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
+        //ASSERT_TRUE(std::isnan(actual_value[i]));
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.00001);
+    }
+}
+
 
 
