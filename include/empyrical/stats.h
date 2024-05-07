@@ -627,7 +627,7 @@ inline double conditional_value_at_risk(const std::vector<double>& returns, doub
     double sum = 0.0;
     std::size_t count = 0;
     for (double ret :returns){
-        if (ret < threshold){
+        if (ret <= threshold){
             sum+=ret;
             count+=1;
         }
@@ -716,7 +716,7 @@ inline std::vector<double> roll_up_capture(std::vector<double>& returns,
                        std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
 
     std::vector<double> data;
-    if (returns.size() < window || returns.size()!=factor_returns.size()){
+    if (returns.size() < static_cast<std::size_t>(window) || returns.size()!=factor_returns.size()){
         data.push_back(NAN);
         return data;
     }
@@ -750,7 +750,7 @@ inline std::vector<double> roll_down_capture(std::vector<double>& returns,
                                     std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
 
     std::vector<double> data;
-    if (returns.size() < window || returns.size()!= factor_returns.size()){
+    if (returns.size() < static_cast<std::size_t>(window) || returns.size()!= factor_returns.size()){
         data.push_back(NAN);
         return data;
     }
@@ -785,7 +785,7 @@ inline std::vector<double> roll_up_down_capture(std::vector<double>& returns,
                                       std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()){
 
     std::vector<double> data;
-    if (returns.size() < window || returns.size() != factor_returns.size()){
+    if (returns.size() < static_cast<std::size_t>(window) || returns.size() != factor_returns.size()){
         data.push_back(NAN);
         return data;
     }
