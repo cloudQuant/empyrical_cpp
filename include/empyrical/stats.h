@@ -3,16 +3,18 @@
 #define EMPYRICAL_CPP_STATS
 #include <stdexcept>
 #include <numeric>
-#include "constants.h"
+#include "datetime.h"
 #include "utils.h"
 #include "optimizer.h"
 #include <algorithm>
 #include <numeric>
+#include <iostream>
 
 
 /*
  * 1. implement downside_risk, not same as original ways to calculate annualised downside_risk
  */
+
 
 // 定义函数 adjust_returns
 inline std::vector<double> adjust_returns(const std::vector<double>& returns, const std::vector<double>& adjustment_factor) {
@@ -121,19 +123,169 @@ inline double cum_returns_final(const std::vector<double>& returns, double start
     return cumulative_value;
 }
 
-//inline PdSeries aggregate_returns(const PdSeries& returns, const std::string& convert_to){
-//    PdSeries data;
-//    if (convert_to == "daily"){
-//        std::vector<double> index = returns.index;
-//
-//    } else if (convert_to == "weekly"){
-//
-//    } else if (convert_to == "monthly"){
-//
-//    } else if (convert_to == "yearly"){
-//
-//    }
-//}
+inline PdSeries aggregate_returns(const PdSeries& returns, const std::string& convert_to){
+    PdSeries total_data;
+    if (convert_to == "daily"){
+        std::vector<DateTime> new_index;
+        std::vector<double> new_returns;
+        std::vector<DateTime> index = returns.index;
+        std::vector<double> values = returns.values;
+        auto datetime_0 = index[0];
+        std::vector<double> data;
+        for (std::size_t i=0; i<index.size();++i){
+            DateTime now_datetime = index[i];
+            double ret = values[i];
+            if (now_datetime.get_day()!= datetime_0.get_day()){
+                double daily_ret = cum_returns_final(data,0);
+                new_returns.push_back(daily_ret);
+                new_index.push_back(now_datetime);
+                datetime_0 = now_datetime;
+                data = {ret};
+            }else{
+                data.push_back(ret);
+                if (i==index.size()-1){
+                    double month_ret = cum_returns_final(data,0);
+                    new_returns.push_back(month_ret);
+                    new_index.push_back(now_datetime);
+                }
+            }
+        }
+        total_data.index = new_index;
+        total_data.values = new_returns;
+        return total_data;
+
+    } else if (convert_to == "weekly"){
+        std::vector<DateTime> new_index;
+        std::vector<double> new_returns;
+        std::vector<DateTime> index = returns.index;
+        std::vector<double> values = returns.values;
+        auto pre_datetime = index[0];
+        std::vector<double> data;
+        for (std::size_t i=0; i<index.size();++i){
+            DateTime now_datetime = index[i];
+            double ret = values[i];
+            uint now_week = now_datetime.get_week();
+            uint pre_week = pre_datetime.get_week();
+            std::cout << "now_week = " << now_week << " pre_week = " << pre_week << std::endl;
+            if (now_week == 0){
+                now_week=7;
+            }
+            if (pre_week == 0){
+                pre_week=7;
+            }
+            if (now_week < pre_week){
+                double weekly_ret = cum_returns_final(data,0);
+                new_returns.push_back(weekly_ret);
+                new_index.push_back(now_datetime);
+                pre_datetime = now_datetime;
+                data = {ret};
+            }else{
+                data.push_back(ret);
+                pre_datetime = now_datetime;
+                if (i==index.size()-1){
+                    double month_ret = cum_returns_final(data,0);
+                    new_returns.push_back(month_ret);
+                    new_index.push_back(now_datetime);
+                }
+            }
+        }
+        total_data.index = new_index;
+        total_data.values = new_returns;
+        return total_data;
+
+    } else if (convert_to == "monthly"){
+        std::vector<DateTime> new_index;
+        std::vector<double> new_returns;
+        std::vector<DateTime> index = returns.index;
+        std::vector<double> values = returns.values;
+        auto datetime_0 = index[0];
+        std::vector<double> data;
+        for (std::size_t i=0; i<index.size();++i){
+            DateTime now_datetime = index[i];
+            double ret = values[i];
+            if (now_datetime.get_month()!= datetime_0.get_month()){
+                double month_ret = cum_returns_final(data,0);
+                new_returns.push_back(month_ret);
+                new_index.push_back(now_datetime);
+                datetime_0 = now_datetime;
+                data = {ret};
+            }else{
+                data.push_back(ret);
+                if (i==index.size()-1){
+                    double month_ret = cum_returns_final(data,0);
+                    new_returns.push_back(month_ret);
+                    new_index.push_back(now_datetime);
+                }
+            }
+        }
+        total_data.index = new_index;
+        total_data.values = new_returns;
+        return total_data;
+
+    } else if (convert_to == "quarterly"){
+        std::vector<DateTime> new_index;
+        std::vector<double> new_returns;
+        std::vector<DateTime> index = returns.index;
+        std::vector<double> values = returns.values;
+        auto datetime_0 = index[0];
+        std::vector<double> data;
+        for (std::size_t i=0; i<index.size();++i){
+            DateTime now_datetime = index[i];
+            double ret = values[i];
+            double now_month = now_datetime.get_month();
+            double pre_month = datetime_0.get_month();
+            if (now_month!= pre_month and (now_month==4|now_month==7||now_month==10|now_month==1)){
+                double month_ret = cum_returns_final(data,0);
+                new_returns.push_back(month_ret);
+                new_index.push_back(now_datetime);
+                datetime_0 = now_datetime;
+                data = {ret};
+            }else{
+                data.push_back(ret);
+                if (i==index.size()-1){
+                    double month_ret = cum_returns_final(data,0);
+                    new_returns.push_back(month_ret);
+                    new_index.push_back(now_datetime);
+                }
+            }
+        }
+        total_data.index = new_index;
+        total_data.values = new_returns;
+        return total_data;
+
+    }
+    else if (convert_to == "yearly"){
+        std::vector<DateTime> new_index;
+        std::vector<double> new_returns;
+        std::vector<DateTime> index = returns.index;
+        std::vector<double> values = returns.values;
+        auto datetime_0 = index[0];
+        std::vector<double> data;
+        for (std::size_t i=0; i<index.size();++i){
+            DateTime now_datetime = index[i];
+            double ret = values[i];
+            if (now_datetime.get_year()!= datetime_0.get_year()){
+                double yearly_ret = cum_returns_final(data,0);
+                new_returns.push_back(yearly_ret);
+                new_index.push_back(now_datetime);
+                datetime_0 = now_datetime;
+                data = {ret};
+            }else{
+                data.push_back(ret);
+                if (i==index.size()-1){
+                    double month_ret = cum_returns_final(data,0);
+                    new_returns.push_back(month_ret);
+                    new_index.push_back(now_datetime);
+                }
+            }
+        }
+        total_data.index = new_index;
+        total_data.values = new_returns;
+        return total_data;
+    }else{
+        return total_data;
+    }
+}
 
 inline double max_drawdown_from_simple_return(const std::vector<double>& simple_returns) {
     if (simple_returns.empty()){

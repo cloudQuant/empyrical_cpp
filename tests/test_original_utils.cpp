@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "../include/empyrical/stats.h"
 #include "../include/empyrical/dtf.h"
+#include "../include/empyrical/datetime.h"
 
 /*
  * 1. don't test omega_ratio as the original test because fix the bug of omega ratio
@@ -118,19 +119,58 @@ protected:
     std::vector<double> two = {0.01846232, 0.00793951, -0.01448395, 0.00422537, -0.00339611,
                                0.03756813, 0.0151531, 0.03549769};
 
-    std::vector<std::string> df_index_simple = {"2000-01-30", "2000-01-31", "2000-02-01", "2000-02-02",
-                                                "2000-02-03", "2000-02-04", "2000-02-05", "2000-02-06"};
-    std::vector<std::string> df_index_week = {"2000-01-30", "2000-02-06", "2000-02-13", "2000-02-20",
-                                              "2000-02-27", "2000-03-05", "2000-03-12", "2000-03-19"};
-    std::vector<std::string> df_index_month = {"2000-01-31", "2000-02-29", "2000-03-31", "2000-04-30",
-                                               "2000-05-31", "2000-06-30", "2000-07-31", "2000-08-31"};
+    std::vector<DateTime> df_index_simple = {DateTime("2000-01-30 00:00:00.000000000"),
+                                             DateTime("2000-01-31 00:00:00.000000000"),
+                                             DateTime("2000-02-01 00:00:00.000000000"),
+                                             DateTime("2000-02-02 00:00:00.000000000"),
+                                             DateTime("2000-02-03 00:00:00.000000000"),
+                                             DateTime("2000-02-04 00:00:00.000000000"),
+                                             DateTime("2000-02-05 00:00:00.000000000"),
+                                             DateTime("2000-02-06 00:00:00.000000000")};
+    std::vector<DateTime> df_index_week = {DateTime("2000-01-30 00:00:00.000000000"),
+                                           DateTime("2000-02-06 00:00:00.000000000"),
+                                           DateTime("2000-02-13 00:00:00.000000000"),
+                                           DateTime("2000-02-20 00:00:00.000000000"),
+                                           DateTime("2000-02-27 00:00:00.000000000"),
+                                           DateTime("2000-03-05 00:00:00.000000000"),
+                                           DateTime("2000-03-12 00:00:00.000000000"),
+                                           DateTime("2000-03-19 00:00:00.000000000")};
+    std::vector<DateTime> df_index_month = {DateTime("2000-01-31 00:00:00.000000000"),
+                                            DateTime("2000-02-29 00:00:00.000000000"),
+                                            DateTime("2000-03-31 00:00:00.000000000"),
+                                            DateTime("2000-04-30 00:00:00.000000000"),
+                                            DateTime("2000-05-31 00:00:00.000000000"),
+                                            DateTime("2000-06-30 00:00:00.000000000"),
+                                            DateTime("2000-07-31 00:00:00.000000000"),
+                                            DateTime("2000-08-31 00:00:00.000000000")};
 
     DataFrame dataframe_simple = {one, two};
     std::vector<std::string> simple_col = {"one", "two"};
     PdDataFrame df_simple{df_index_simple, simple_col, dataframe_simple};
     PdDataFrame df_week{df_index_week, simple_col, dataframe_simple};
     PdDataFrame df_month{df_index_month, simple_col, dataframe_simple};
+    PdSeries simple_benchmark{df_index_simple,simple_benchmark_value};
+    std::vector<DateTime> weekly_index = {DateTime("2000-01-30 00:00:00.000000000"),
+                                          DateTime("2000-02-06 00:00:00.000000000"),
+                                          DateTime("2000-02-13 00:00:00.000000000"),
+                                          DateTime("2000-02-20 00:00:00.000000000"),
+                                          DateTime("2000-02-27 00:00:00.000000000"),
+                                          DateTime("2000-03-05 00:00:00.000000000"),
+                                          DateTime("2000-03-12 00:00:00.000000000"),
+                                          DateTime("2000-03-19 00:00:00.000000000"),
+                                          DateTime("2000-03-26 00:00:00.000000000")};
+    std::vector<DateTime> monthly_index = {DateTime("2000-01-31 00:00:00.000000000"),
+                                            DateTime("2000-02-29 00:00:00.000000000"),
+                                            DateTime("2000-03-31 00:00:00.000000000"),
+                                            DateTime("2000-04-30 00:00:00.000000000"),
+                                            DateTime("2000-05-31 00:00:00.000000000"),
+                                            DateTime("2000-06-30 00:00:00.000000000"),
+                                            DateTime("2000-07-31 00:00:00.000000000"),
+                                            DateTime("2000-08-31 00:00:00.000000000"),
+                                            DateTime("2000-09-30 00:00:00.000000000")};
 
+    PdSeries weekly_returns{weekly_index,weekly_returns_value};
+    PdSeries monthly_returns{monthly_index,monthly_returns_value};
 };
 
 TEST_F(OriginalStatsTest, test_simple_returns_1){
@@ -2664,6 +2704,96 @@ TEST_F(OriginalStatsTest, test_conditional_value_at_risk_2){
                     expected_cvar, 0.0001);
     }
 
+}
+
+TEST_F(OriginalStatsTest, test_aggregate_returns_1){
+    PdSeries result = aggregate_returns(simple_benchmark,"monthly");
+    std::vector<double> actual_value = result.values;
+    std::vector<double> expect_value = {0.01,
+                                        0.03030099999999991};
+    cal_func::print_vector(actual_value,"actual_value");
+    for (std::size_t i=0; i<expect_value.size(); ++i){
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
+    }
+
+
+}
+
+TEST_F(OriginalStatsTest, test_aggregate_returns_2){
+    PdSeries result = aggregate_returns(simple_benchmark,"quarterly");
+    std::vector<double> actual_value = result.values;
+    std::vector<double> expect_value = {0.04060401};
+    cal_func::print_vector(actual_value,"actual_value");
+    for (std::size_t i=0; i<expect_value.size(); ++i){
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
+    }
+
+
+}
+
+TEST_F(OriginalStatsTest, test_aggregate_returns_3){
+    PdSeries result = aggregate_returns(simple_benchmark,"yearly");
+    std::vector<double> actual_value = result.values;
+    std::vector<double> expect_value = {0.04060401};
+    cal_func::print_vector(actual_value,"actual_value");
+    for (std::size_t i=0; i<expect_value.size(); ++i){
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_aggregate_returns_4){
+    PdSeries result = aggregate_returns(weekly_returns,"monthly");
+    std::vector<double> actual_value = result.values;
+    std::vector<double> expect_value = {0.0, 0.087891200000000058,
+                                        -0.04500459999999995};
+    cal_func::print_vector(actual_value,"actual_value");
+    for (std::size_t i=0; i<expect_value.size(); ++i){
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_aggregate_returns_5){
+    PdSeries result = aggregate_returns(weekly_returns,"yearly");
+    std::vector<double> actual_value = result.values;
+    std::vector<double> expect_value = {0.038931091700480147};
+    cal_func::print_vector(actual_value,"actual_value");
+    for (std::size_t i=0; i<expect_value.size(); ++i){
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_aggregate_returns_6){
+    PdSeries result = aggregate_returns(monthly_returns,"yearly");
+    std::vector<double> actual_value = result.values;
+    std::vector<double> expect_value = {0.038931091700480147};
+    cal_func::print_vector(actual_value,"actual_value");
+    for (std::size_t i=0; i<expect_value.size(); ++i){
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_aggregate_returns_7){
+    PdSeries result = aggregate_returns(monthly_returns,"quarterly");
+    std::vector<double> actual_value = result.values;
+    std::vector<double> expect_value = {0.11100000000000021,
+                                        0.008575999999999917,
+                                        -0.072819999999999996};
+    cal_func::print_vector(actual_value,"actual_value");
+    for (std::size_t i=0; i<expect_value.size(); ++i){
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
+    }
+}
+
+TEST_F(OriginalStatsTest, test_aggregate_returns_8){
+    PdSeries result = aggregate_returns(simple_benchmark,"weekly");
+    std::vector<double> actual_value = result.values;
+    std::vector<double> expect_value = {0.0,
+                                        0.040604010000000024,
+                                        0.0};
+    cal_func::print_vector(actual_value,"actual_value");
+    for (std::size_t i=0; i<expect_value.size(); ++i){
+        ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
+    }
 }
 
 
