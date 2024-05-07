@@ -121,6 +121,20 @@ inline double cum_returns_final(const std::vector<double>& returns, double start
     return cumulative_value;
 }
 
+//inline PdSeries aggregate_returns(const PdSeries& returns, const std::string& convert_to){
+//    PdSeries data;
+//    if (convert_to == "daily"){
+//        std::vector<double> index = returns.index;
+//
+//    } else if (convert_to == "weekly"){
+//
+//    } else if (convert_to == "monthly"){
+//
+//    } else if (convert_to == "yearly"){
+//
+//    }
+//}
+
 inline double max_drawdown_from_simple_return(const std::vector<double>& simple_returns) {
     if (simple_returns.empty()){
         return NAN;

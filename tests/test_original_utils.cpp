@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "../include/empyrical/stats.h"
+#include "../include/empyrical/dtf.h"
 
 /*
  * 1. don't test omega_ratio as the original test because fix the bug of omega ratio

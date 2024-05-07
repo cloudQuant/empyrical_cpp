@@ -32,10 +32,12 @@ if (DEFINED ${BOOST_INCLUDE_DIR})
 endif()
 
 set(EMPYRICAL_HEADERS
-        ../include/empyrical/utils.h
-        ../include/empyrical/perf_attrib.h
-        ../include/empyrical/constants.h
-        ../include/empyrical/stats.h
+        include/empyrical/utils.h
+        include/empyrical/perf_attrib.h
+        include/empyrical/constants.h
+        include/empyrical/stats.h
+        include/empyrical/dtf.h
+        include/empyrical/datetime.h
 )
 
 set(EMPYRICAL_SOURCES
@@ -68,14 +70,17 @@ enable_testing()
 
 add_executable(
         empyrical_test
-        ../include/empyrical/utils.h
-        ../include/empyrical/perf_attrib.h
-        ../include/empyrical/constants.h
-        ../include/empyrical/stats.h
+#        ../include/empyrical/utils.h
+#        ../include/empyrical/perf_attrib.h
+#        ../include/empyrical/constants.h
+#        ../include/empyrical/stats.h
+#        ../include/empyrical/dtf.h
         tests/test_utils.cpp
         tests/test_stats.cpp
-        tests/test_perf_attrib.cpp
         tests/test_original_utils.cpp
+        tests/test_dtf.cpp
+        tests/test_datetime.cpp
+        tests/test_perf_attrib.cpp
 
 
 )

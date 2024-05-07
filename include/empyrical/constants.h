@@ -1,6 +1,6 @@
 #pragma once
-#ifndef EMPYRICAL_CPP_PERIOD
-#define EMPYRICAL_CPP_PERIOD
+#ifndef EMPYRICAL_CPP_CONSTANTS
+#define EMPYRICAL_CPP_CONSTANTS
 #include <unordered_map>
 #include <string>
 
@@ -33,10 +33,36 @@ using CustomFunc = std::function<double(const std::vector<double>&,
                                         const std::map<std::string, double>)>;
 
 struct PdSeries{
-    std::vector<std::string> index;
-    std::vector<std::string> cols;
+    std::vector<std::any> index;
     std::vector<double> values;
+
+    void addValue(const std::pair<std::string,double>& p) {
+        index.push_back(p.first);
+        values.push_back(p.second);
+    }
+
+    void addValue(const std::pair<double,double>& p) {
+        index.push_back(p.first);
+        values.push_back(p.second);
+    }
+    void print_index() {
+        for (const auto& val : index) {
+            if (val.type() == typeid(std::string)) {
+                std::cout << std::any_cast<std::string>(val) << " " << std::endl;
+            } else if (val.type() == typeid(double)) {
+                std::cout << std::any_cast<double>(val) << " " << std::endl;
+            }
+        }
+    }
+    void print_values() {
+        for (const auto& val : values) {
+            std::cout << val<< " " << std::endl;
+        }
+    }
 };
+
+
+
 
 struct PdDataFrame{
     std::vector<std::string> index;
@@ -56,6 +82,19 @@ struct DataFrameRollingWindowResult {
     std::size_t numWindows{};
 };
 
+struct datetime_t{
+    uint year;
+    uint month;
+    uint day;
+    uint week;
+    uint hour;
+    uint minute;
+    uint seconds;
+    uint milliseconds;
+    uint microseconds;
+    uint nanoseconds;
+};
+
 enum class Interpolation { Linear, Lower, Higher, Midpoint, Nearest };
 
-#endif // EMPYRICAL_CPP_PERIOD
+#endif // EMPYRICAL_CPP_CONSTANTS
