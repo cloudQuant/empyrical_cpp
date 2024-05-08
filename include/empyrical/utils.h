@@ -46,7 +46,7 @@ namespace cal_func{
     }
 
 
-    inline  DataFrameRollingWindowResult rolling_window(const DataFrame & df, int length) {
+    inline  DataFrameRollingWindowResult rolling_window(const std::vector<std::vector<double>> & df, int length) {
         // Check for valid input
         if (length <= 0) {
             throw std::invalid_argument("Window length must be positive");
@@ -66,7 +66,7 @@ namespace cal_func{
         result.numWindows = numWindows;
 
         // Resize the data vector to hold the result
-        result.data.resize(numWindows, DataFrame(length, std::vector<double>(origCols, 0)));
+        result.data.resize(numWindows, std::vector<std::vector<double>>(length, std::vector<double>(origCols, 0)));
 
         // Populate the rolling window result
         for (std::size_t i = 0; i < numWindows; ++i) {
@@ -81,7 +81,7 @@ namespace cal_func{
         return result;
     }
 
-    inline  ArrayRollingWindowResult rolling_window(const Array & arr, int length) {
+    inline  ArrayRollingWindowResult rolling_window(const std::vector<double> & arr, int length) {
         // Check for valid input
         if (length <= 0) {
             throw std::invalid_argument("Window length must be positive");

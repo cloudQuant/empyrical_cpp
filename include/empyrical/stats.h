@@ -86,7 +86,6 @@ inline std::vector<double> cum_returns(const std::vector<double>& returns, doubl
         if (std::isnan(ret)){
             ret = 0.0;
         }
-        //std::cout << "ret " << i << " = " << ret << std::endl;
         cumulative_value *= (1.0 + ret);
         if (starting_value==0){
             cumulative_returns[i] = cumulative_value - 1.0;
@@ -110,7 +109,6 @@ inline double cum_returns_final(const std::vector<double>& returns, double start
         if (std::isnan(ret)){
             ret = 0.0;
         }
-        //std::cout << "ret " << i << " = " << ret << std::endl;
         cumulative_value *= (1.0 + ret);
     }
 
@@ -123,8 +121,8 @@ inline double cum_returns_final(const std::vector<double>& returns, double start
     return cumulative_value;
 }
 
-inline PdSeries aggregate_returns(const PdSeries& returns, const std::string& convert_to){
-    PdSeries total_data;
+inline MySeries aggregate_returns(const MySeries& returns, const std::string& convert_to){
+    MySeries total_data;
     if (convert_to == "daily"){
         std::vector<DateTime> new_index;
         std::vector<double> new_returns;
@@ -166,7 +164,6 @@ inline PdSeries aggregate_returns(const PdSeries& returns, const std::string& co
             double ret = values[i];
             uint now_week = now_datetime.get_week();
             uint pre_week = pre_datetime.get_week();
-            std::cout << "now_week = " << now_week << " pre_week = " << pre_week << std::endl;
             if (now_week == 0){
                 now_week=7;
             }
@@ -305,7 +302,6 @@ inline double max_drawdown_from_simple_return(const std::vector<double>& simple_
         double dd = (i - peak) / peak;  // 计算回撤比例
         max_dd = std::min(max_dd, dd);  // 更新最大回撤
 
-//        std::cout << "ret["<<i<<"]="<<returns[i] <<" peak = " << peak <<  " max_dd = " << max_dd << std::endl;
     }
 
     return max_dd;  // 返回负值表示最大回撤
@@ -377,14 +373,12 @@ inline double calmar_ratio_from_simple_return(const std::vector<double>& returns
                     const std::string& period = "daily",
                     std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN()) {
     double max_dd = max_drawdown_from_simple_return(returns);
-    std::cout << "max_dd = " << max_dd << std::endl;
     if (max_dd < 0) {
         double rate = annual_return_from_simple_return(returns, period, annualization);
         double temp = rate / std::abs(max_dd);
         if (std::isinf(temp) || std::isnan(temp)) {
             return std::numeric_limits<double>::quiet_NaN();
         }
-        std::cout << "rate = " << rate << " max_dd = " << max_dd <<" temp = " << temp << std::endl;
         return temp;
     } else {
         return std::numeric_limits<double>::quiet_NaN();
@@ -394,13 +388,11 @@ inline double calmar_ratio_from_simple_return(const std::vector<double>& returns
 inline double calmar_ratio_from_net_values(const std::vector<double>& net_values,
                                     std::size_t annualization){
     double max_dd = max_drawdown_from_net_values(net_values);
-    std::cout << "max_dd = " << max_dd << std::endl;
     if (max_dd < 0) {
         double temp = annual_return_from_net_values(net_values, annualization) / std::abs(max_dd);
         if (std::isinf(temp) || std::isnan(temp)) {
             return std::numeric_limits<double>::quiet_NaN();
         }
-        std::cout << "temp = " << temp << std::endl;
         return temp;
     } else {
         return std::numeric_limits<double>::quiet_NaN();
@@ -458,7 +450,6 @@ inline double calculate_sharpe_ratio(std::vector<double>& returns,
             return std::numeric_limits<double>::infinity();
         }
         double sharpeRatio = meanReturn / volatility;
-        std::cout << "meanReturn = " << meanReturn << " volatility = " << volatility << " sharpeRatio = " << sharpeRatio << std::endl;
         return sharpeRatio;
     } else{
         double meanReturn = cal_func::nan_mean(returns);
@@ -468,7 +459,6 @@ inline double calculate_sharpe_ratio(std::vector<double>& returns,
             return std::numeric_limits<double>::infinity();
         }
         double sharpeRatio = meanReturn / volatility;
-        std::cout << "meanReturn = " << meanReturn << " volatility = " << volatility << " sharpeRatio = " << sharpeRatio << std::endl;
         return sharpeRatio;
     }
 
@@ -524,9 +514,7 @@ inline double calculate_downside_risk(const std::vector<double>& returns,
     std::vector<double> new_return = adjust_returns(returns, required_return);
     double sum = 0.0;
     double nan_count = 0.0;
-    std::cout << "adjust_returns = [";
     for (double v: new_return){
-        std::cout << v << std::endl;
         if (v<0){
             sum+=v*v;
         }
@@ -534,7 +522,6 @@ inline double calculate_downside_risk(const std::vector<double>& returns,
             nan_count += 1.0;
         }
     }
-    std::cout << "]" << std::endl;
     sum/=(static_cast<double>(returns.size())-nan_count);
     return std::sqrt(sum);
 }
@@ -728,15 +715,11 @@ inline double percentile(const std::vector<double>& arr,
 
     int k = static_cast<int>(std::floor(pos));
     double d = pos - k;
-    //std::cout <<"n = " << n << " q = " << q << " k = "<< k << " d = "<< d << std::endl;
     switch (interpolation) {
         case Interpolation::Linear:
             if (d==0.0) {
                 return sorted_arr[k];
             } else {
-                //std::cout << "sorted_arr[k] = "<<sorted_arr[k]<<std::endl;
-                //std::cout << "sorted_arr[k + 1] =" << sorted_arr[k + 1] << std::endl;
-                //std::cout << "d = " << d << std::endl;
                 return sorted_arr[k] + d * (sorted_arr[k + 1] - sorted_arr[k]);
             }
         case Interpolation::Lower:
@@ -862,7 +845,6 @@ inline double down_capture(std::vector<double>& returns,
     cal_func::print_vector(new_factor_returns1, "new_factor_returns");
     double a = annual_return_from_simple_return(new_returns1,period,annualization);
     double b = annual_return_from_simple_return(new_factor_returns1,period,annualization);
-    std::cout << "a = " << a << " b =" << b << std::endl;
     return a/b;
 }
 
@@ -991,21 +973,21 @@ inline double beta_aligned(const std::vector<double>& returns,
         return std::numeric_limits<double>::quiet_NaN();
     }
 
-    int N = returns.size();  // 数据点数量
+    std::size_t N = returns.size();  // 数据点数量
 
     // 计算回归变量的均值
     double x_mean = 0.0;
-    for (int i = 0; i < N; ++i) {
+    for (std::size_t i = 0; i < N; ++i) {
         x_mean += factor_returns[i];  // 假设只有一个回归变量
     }
-    x_mean /= N;
+    x_mean /= static_cast<double>(N);
 
     // 计算因变量的均值
     double y_mean = 0.0;
     for (int i = 0; i < N; ++i) {
         y_mean += returns[i];  // 假设只有一个因变量
     }
-    y_mean /= N;
+    y_mean /= static_cast<double>(N);
 
     // 计算回归系数 b 的分子和分母
     double numerator = 0.0;
@@ -1107,7 +1089,6 @@ inline std::vector<std::pair<double, double>> roll_alpha_beta(std::vector<double
 
     std::vector<std::pair<double, double>> data;
     if (returns.size() != factor_returns.size()){
-        std::cout << "长度不一致" << std::endl;
         return data;
     }
     std::size_t size = returns.size();
@@ -1259,7 +1240,7 @@ inline double gpd_loglikelihood_scale_only(double scale, const std::vector<doubl
 
 // 基于尺度和形状参数的 GPD 对数似然函数计算
 inline double gpd_loglikelihood_scale_and_shape(double scale, double shape, const std::vector<double>& price_data) {
-    int n = price_data.size();
+    std::size_t n = price_data.size();
     double result = -std::numeric_limits<double>::max();
 
     if (scale != 0) {
@@ -1269,7 +1250,7 @@ inline double gpd_loglikelihood_scale_and_shape(double scale, double shape, cons
             for (double price : price_data) {
                 sum_log += std::log((param_factor * price) + 1);
             }
-            result = (-n * std::log(scale)) - (((1.0 / shape) + 1.0) * sum_log);
+            result = (-1.0*static_cast<double>(n) * std::log(scale)) - (((1.0 / shape) + 1.0) * sum_log);
         }
     }
 
@@ -1298,9 +1279,6 @@ inline double gpd_loglikelihood(const std::vector<double>& params, const std::ve
 
 
 
-inline double function_to_minimize(const std::array<double,2>& x) {
-    return x[0]*x[0] + x[1]*x[1];
-}
 // Gradient descent optimization
 inline std::vector<double> gpd_loglikelihood_minimizer_aligned(const std::vector<double> &price_data) {
 
@@ -1357,20 +1335,13 @@ inline std::vector<double> gpd_risk_estimates_aligned(std::vector<double>& retur
             if (!param_result.empty()) {
                 scale_param = param_result[0];  // Placeholder assignment
                 shape_param = param_result[1];  // Placeholder assignment
-//                std::cout << "threshold = " << threshold << std::endl;
-//                std::cout << "scale_param = " << scale_param << std::endl;
-//                std::cout << "shape_param = " << shape_param << std::endl;
-//                std::cout << "var_p = " << var_p << std::endl;
-//                std::cout << "losses.size() = " << losses.size() << std::endl;
-//                std::cout << "losses_beyond_threshold.size() = " << losses_beyond_threshold.size() << std::endl;
                 var_estimate = gpd_var_calculator(threshold,
                                                          scale_param,
                                                          shape_param,
                                                          var_p,
-                                                         losses.size(),
-                                                         losses_beyond_threshold.size());
+                                                         static_cast<double>(losses.size()),
+                                                         static_cast<double>(losses_beyond_threshold.size()));
 
-                std::cout << "var_estimate = " << var_estimate << std::endl;
                 if (shape_param > 0 && var_estimate > 0) {
                     finished = true;
                 }

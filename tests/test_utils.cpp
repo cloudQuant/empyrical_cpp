@@ -29,7 +29,7 @@ TEST_F(RollNdarrayTest, BasicTest) {
 
 TEST_F(RollNdarrayTest, ValidInput) {
     // Create a test DataFrame
-    DataFrame df = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    std::vector<std::vector<double>> df = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 
     // Define the expected result
     DataFrameRollingWindowResult expected_result;
@@ -48,7 +48,7 @@ TEST_F(RollNdarrayTest, ValidInput) {
 // Test case for invalid window length
 TEST_F(RollNdarrayTest, InvalidWindowLength) {
     // Create a test DataFrame
-    DataFrame df = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+    std::vector<std::vector<double>> df = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 
     // Call the rolling_window function with an invalid window length
     int window_length = 0;
@@ -59,7 +59,7 @@ TEST_F(RollNdarrayTest, InvalidWindowLength) {
 
 
 TEST_F(RollNdarrayTest, PositiveWindowLength) {
-    Array arr = {1, 2, 3, 4, 5};
+    std::vector<double> arr = {1, 2, 3, 4, 5};
     int length = 3;
 
     ArrayRollingWindowResult result = cal_func::rolling_window(arr, length);
@@ -79,7 +79,7 @@ TEST_F(RollNdarrayTest, PositiveWindowLength) {
 
 // Test case for zero window length
 TEST_F(RollNdarrayTest, ZeroWindowLength) {
-    Array arr = {1, 2, 3, 4, 5};
+    std::vector<double> arr = {1, 2, 3, 4, 5};
     int length = 0;
 
     // Check if the function throws an invalid_argument exception
@@ -88,7 +88,7 @@ TEST_F(RollNdarrayTest, ZeroWindowLength) {
 
 // Test case for window length greater than array size
 TEST_F(RollNdarrayTest, WindowLengthGreaterThanArraySize) {
-    Array arr = {1, 2, 3, 4, 5};
+    std::vector<double> arr = {1, 2, 3, 4, 5};
     int length = 10;
 
     // Check if the function throws an invalid_argument exception

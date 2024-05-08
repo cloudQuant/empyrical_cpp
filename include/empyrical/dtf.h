@@ -332,7 +332,6 @@ namespace dtf {
             }
             work -= 1;
         }
-        // std::cout << "new_work << " << work << std::endl;
         for ( i = 11; i && (spm[i] > work); --i )
             ;
         std::size_t mons = i;

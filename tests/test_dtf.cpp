@@ -12,15 +12,12 @@ const char *buffer2 = "01-01-2021-00:00:00.000";
 const char *buffer3 = "2021-01-01 00.00.00.000000";
 
 std::size_t flags1 = dtf::dt_str_flags(buffer1, 19);
-std::cout << "flag1 = " << flags1 << std::endl;
 EXPECT_EQ(flags1, dtf::flags::yyyy_mm_dd | dtf::flags::sep1 | dtf::flags::secs);
 
 std::size_t flags2 = dtf::dt_str_flags(buffer2, 23);
-std::cout << "flag2 = " << flags2 << std::endl;
 EXPECT_EQ(flags2, dtf::flags::dd_mm_yyyy | dtf::flags::sep3 | dtf::flags::msecs);
 
 std::size_t flags3 = dtf::dt_str_flags(buffer3, 26);
-std::cout << "flag3 = " << flags3 << std::endl;
 EXPECT_EQ(flags3, dtf::flags::yyyy_mm_dd | dtf::flags::sep1 | dtf::flags::usecs);
 
 // Add more test cases as needed
@@ -46,17 +43,14 @@ std::uint64_t timestamp = 1609459200000000000ull; // 2021-01-01 00:00:00
 
 std::size_t n = dtf::timestamp_to_dt_chars(buffer, timestamp, dtf::flags::yyyy_mm_dd | dtf::flags::secs  | dtf::flags::sep1);
 buffer[n] = '\0'; // Null-terminate the string
-//    std::cout << "buffer = " << buffer << std::endl;
 EXPECT_EQ(std::strcmp(buffer, "2021-01-01 00:00:00"), 0);
 
 n = dtf::timestamp_to_dt_chars(buffer, timestamp, dtf::flags::dd_mm_yyyy | dtf::flags::msecs | dtf::flags::sep1);
 buffer[n] = '\0'; // Null-terminate the string
-//    std::cout << "buffer = " << buffer << std::endl;
 EXPECT_EQ(std::strcmp(buffer, "01-01-2021 00:00:00.000"), 0);
 
 n = dtf::timestamp_to_dt_chars(buffer, timestamp, dtf::flags::yyyy_mm_dd | dtf::flags::usecs | dtf::flags::sep1);
 buffer[n] = '\0'; // Null-terminate the string
-//    std::cout << "buffer = " << buffer << std::endl;
 EXPECT_EQ(std::strcmp(buffer, "2021-01-01 00:00:00.000000"), 0);
 
 // Add more test cases as needed
@@ -300,7 +294,7 @@ TEST_F(DtfTest, timePointToString){
     std::string strTime = dtf::timePointToString(now);
 
     // 输出转换后的时间
-    std::cout << "Current time (with milliseconds): " << strTime << std::endl;
+    //std::cout << "Current time (with milliseconds): " << strTime << std::endl;
 }
 
 TEST_F(DtfTest, timestamp_to_datetime){
