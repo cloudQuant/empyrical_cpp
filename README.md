@@ -29,9 +29,13 @@ cmake --build build
 ### target
 
 -[ ] run successfully in windows
+
 -[ ] update the class of DateTime, add timezone support and improve computational speed。
+
 -[ ] add new functions to perf_attrib.h 
+
 -[ ] re-implement the pyfolio using c++20 in another module 
+
 -[ ] re-implement the alphalens using c++20 in another module 
 
 
