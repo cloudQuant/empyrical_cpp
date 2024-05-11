@@ -1,8 +1,15 @@
-### empyrical_cpp
+# empyrical_cpp
 empyrical_cpp is a header-only project using C++20 re-implement the "empyrical" project, 
 which was originally written in Python.
 
-### using 
+<p style="text-align: center;">
+    <img src="https://img.shields.io/badge/version-0.1-blueviolet.svg" alt="Version 0.1"/>
+    <img src="https://img.shields.io/badge/platform-mac|linux-yellow.svg" alt="Supported Platforms: Mac and Linux"/>
+    <img src="https://img.shields.io/badge/build-passing-brightgreen" alt="Build: Passing"/>
+    <img src="https://img.shields.io/badge/license-MIT-orange" alt="License: MIT"/>
+</p>
+
+### how to use it
 ```git 
 git clone https://github.com/cloudQuant/empyrical_cpp.git
 cd empyrical_cpp
