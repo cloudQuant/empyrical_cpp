@@ -75,6 +75,7 @@ add_executable(
         tests/test_datetime.cpp
         tests/test_original_utils.cpp
         tests/test_perf_attrib.cpp
+        tests/test_some_functions.cpp
 )
 
 target_link_libraries(
