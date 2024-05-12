@@ -44,16 +44,16 @@ const std::unordered_map<std::string, std::size_t> ANNUALIZATION_FACTORS = {
 
 struct datetime_t{
     bool empty;
-    uint year;
-    uint month;
-    uint day;
-    uint week;
-    uint hour;
-    uint minute;
-    uint seconds;
-    uint milliseconds;
-    uint microseconds;
-    uint nanoseconds;
+    unsigned int year;
+    unsigned int month;
+    unsigned int day;
+    unsigned int week;
+    unsigned int hour;
+    unsigned int minute;
+    unsigned int seconds;
+    unsigned int milliseconds;
+    unsigned int microseconds;
+    unsigned int nanoseconds;
 };
 
 
@@ -283,43 +283,43 @@ public:
         return m_timestamp;
     }
 
-    uint get_year(){
+    unsigned int get_year(){
         init_datetime_t();
         return m_datetime_t.year;
     }
-    uint get_month(){
+    unsigned int get_month(){
         init_datetime_t();
         return m_datetime_t.month;
     }
-    uint get_day(){
+    unsigned int get_day(){
         init_datetime_t();
         return m_datetime_t.day;
     }
-    uint get_week(){
+    unsigned int get_week(){
         init_datetime_t();
         return m_datetime_t.week;
     }
-    uint get_hour(){
+    unsigned int get_hour(){
         init_datetime_t();
         return m_datetime_t.hour;
     }
-    uint get_minute(){
+    unsigned int get_minute(){
         init_datetime_t();
         return m_datetime_t.minute;
     }
-    uint get_second(){
+    unsigned int get_second(){
         init_datetime_t();
         return m_datetime_t.seconds;
     }
-    uint get_milliseconds(){
+    unsigned int get_milliseconds(){
         init_datetime_t();
         return m_datetime_t.milliseconds;
     }
-    uint get_microseconds(){
+    unsigned int get_microseconds(){
         init_datetime_t();
         return m_datetime_t.milliseconds;
     }
-    uint get_nanoseconds(){
+    unsigned int get_nanoseconds(){
         init_datetime_t();
         return m_datetime_t.nanoseconds;
     }

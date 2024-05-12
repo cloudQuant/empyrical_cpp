@@ -39,19 +39,22 @@ namespace dtf {
 
     /*************************************************************************************************/
     // todo 在windows平台使用存在问题
-    inline  std::vector<std::chrono::system_clock::time_point> date_range(const std::string& start_date_str,
-                                                                          int periods,
-                                                                          const std::string& freq,
-                                                                          bool v=true) {
-        // Define time step based on frequency
+    std::vector<std::chrono::system_clock::time_point> date_range(const std::string& start_date_str,
+                                                                  int periods,
+                                                                  const std::string& freq,
+                                                                  bool v=true) {
         // Convert start date string to time point
         std::tm tm = {};
-        strptime(start_date_str.c_str(), "%Y-%m-%d", &tm);
+        std::istringstream ss(start_date_str);
+
+        ss >> std::get_time(&tm, "%Y-%m-%d");
         std::time_t start_time = std::mktime(&tm);
         std::chrono::system_clock::time_point start_date =
                 std::chrono::system_clock::from_time_t(start_time);
+
         // Generate datetime list
         std::vector<std::chrono::system_clock::time_point> datetime_list;
+
         // Default to daily frequency
         if (freq == "H") {
             std::chrono::hours time_step = std::chrono::hours(1);  // Hourly frequency
@@ -69,6 +72,7 @@ namespace dtf {
                 datetime_list.push_back(start_date + i * time_step);
             }
         }
+
         return datetime_list;
     }
 /*************************************************************************************************/
@@ -104,8 +108,10 @@ namespace dtf {
                                                int type = 0) {
         // Define time step based on frequency
         // Convert start date string to time point
+        // Convert start date string to time point
         std::tm tm = {};
-        strptime(start_date_str.c_str(), "%Y-%m-%d", &tm);
+        std::istringstream ss(start_date_str);
+        ss >> std::get_time(&tm, "%Y-%m-%d");
         std::time_t start_time = std::mktime(&tm);
         std::chrono::system_clock::time_point start_date =
                 std::chrono::system_clock::from_time_t(start_time);

@@ -287,4 +287,4 @@ nelder_mead_result<real,n> nelder_mead(
     return result;
 }
 
-#endif // PTR_NELDER_MEAD_
+#endif // PTR_NELDER_MEAD_H

@@ -162,8 +162,8 @@ inline MySeries aggregate_returns(const MySeries& returns, const std::string& co
         for (std::size_t i=0; i<index.size();++i){
             DateTime now_datetime = index[i];
             double ret = values[i];
-            uint now_week = now_datetime.get_week();
-            uint pre_week = pre_datetime.get_week();
+            unsigned int now_week = now_datetime.get_week();
+            unsigned int pre_week = pre_datetime.get_week();
             if (now_week == 0){
                 now_week=7;
             }
