@@ -39,7 +39,7 @@ namespace dtf {
 
     /*************************************************************************************************/
     // todo 在windows平台使用存在问题
-    std::vector<std::chrono::system_clock::time_point> date_range(const std::string& start_date_str,
+    inline std::vector<std::chrono::system_clock::time_point> date_range(const std::string& start_date_str,
                                                                   int periods,
                                                                   const std::string& freq,
                                                                   bool v=true) {
