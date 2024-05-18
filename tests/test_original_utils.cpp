@@ -1026,14 +1026,14 @@ TEST_F(OriginalStatsTest, test_excess_sharpe_6){
             noisy_returns_1.push_back(pos_line_value[i]);
         }
     }
-
+    std::cout << "run 1 success" << std::endl;
     std::vector<double> noisy_returns_2;
     noisy_returns_2.reserve(1000);
     for (int i=0; i<1000; ++i){
         if (i<500){
-            noisy_returns_1.push_back(flat_line_0_value[i]);
+            noisy_returns_2.push_back(flat_line_0_value[i]);
         }else{
-            noisy_returns_1.push_back(pos_line_value[i]);
+            noisy_returns_2.push_back(pos_line_value[i]);
         }
     }
 
@@ -1041,9 +1041,9 @@ TEST_F(OriginalStatsTest, test_excess_sharpe_6){
     noisy_returns_3.reserve(1000);
     for (int i=0; i<1000; ++i){
         if (i<750){
-            noisy_returns_1.push_back(flat_line_0_value[i]);
+            noisy_returns_3.push_back(flat_line_0_value[i]);
         }else{
-            noisy_returns_1.push_back(pos_line_value[i]);
+            noisy_returns_3.push_back(pos_line_value[i]);
         }
     }
     double ir_1 = calculate_excess_sharpe_ratio(noisy_returns_1, flat_line_0_value,1);
@@ -1068,9 +1068,9 @@ TEST_F(OriginalStatsTest, test_excess_sharpe_7){
     noisy_returns_2.reserve(1000);
     for (int i=0; i<1000; ++i){
         if (i<500){
-            noisy_returns_1.push_back(flat_line1_tz_value[i]);
+            noisy_returns_2.push_back(flat_line1_tz_value[i]);
         }else{
-            noisy_returns_1.push_back(pos_line_value[i]);
+            noisy_returns_2.push_back(pos_line_value[i]);
         }
     }
 
@@ -1078,9 +1078,9 @@ TEST_F(OriginalStatsTest, test_excess_sharpe_7){
     noisy_returns_3.reserve(1000);
     for (int i=0; i<1000; ++i){
         if (i<750){
-            noisy_returns_1.push_back(flat_line1_tz_value[i]);
+            noisy_returns_3.push_back(flat_line1_tz_value[i]);
         }else{
-            noisy_returns_1.push_back(pos_line_value[i]);
+            noisy_returns_3.push_back(pos_line_value[i]);
         }
     }
     double ir_1 = calculate_excess_sharpe_ratio(noisy_returns_1, flat_line_0_value,1);
@@ -1105,9 +1105,9 @@ TEST_F(OriginalStatsTest, test_excess_sharpe_8){
     noisy_returns_2.reserve(1000);
     for (int i=0; i<1000; ++i){
         if (i<500){
-            noisy_returns_1.push_back(noise_value[i]);
+            noisy_returns_2.push_back(noise_value[i]);
         }else{
-            noisy_returns_1.push_back(pos_line_value[i]);
+            noisy_returns_2.push_back(pos_line_value[i]);
         }
     }
 
@@ -1115,9 +1115,9 @@ TEST_F(OriginalStatsTest, test_excess_sharpe_8){
     noisy_returns_3.reserve(1000);
     for (int i=0; i<1000; ++i){
         if (i<750){
-            noisy_returns_1.push_back(noise_value[i]);
+            noisy_returns_3.push_back(noise_value[i]);
         }else{
-            noisy_returns_1.push_back(pos_line_value[i]);
+            noisy_returns_3.push_back(pos_line_value[i]);
         }
     }
     double ir_1 = calculate_excess_sharpe_ratio(noisy_returns_1, flat_line_0_value,1);
@@ -2762,7 +2762,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_8){
     std::vector<double> actual_value = result.values;
     std::vector<double> expect_value = {0.0,
                                         0.040604010000000024,
-                                        0.0};
+                                        };
     cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);

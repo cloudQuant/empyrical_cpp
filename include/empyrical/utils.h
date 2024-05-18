@@ -56,8 +56,7 @@ namespace cal_func{
         std::size_t origCols = df[0].size();
 
         if (origRows < static_cast<std::size_t>(length)) {
-            throw std::invalid_argument("Cannot create windows of length " + std::to_string(length)
-                                        + " from an array with fewer rows");
+            throw std::invalid_argument("Cannot create windows of length from an array with fewer rows");
         }
 
         std::size_t numWindows = origRows - length + 1;

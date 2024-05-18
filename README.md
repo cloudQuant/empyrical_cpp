@@ -15,8 +15,10 @@ git clone https://github.com/cloudQuant/empyrical_cpp.git
 cd empyrical_cpp
 cmake -B build
 cmake --build build
-# 运行测试
-./build/empyrical_test
+# mac or linux 运行测试
+# ./build/empyrical_test
+# windows
+# ./build/Debug/empyrical_test.exe
 ```
 ### why re-implement the empyrical module
 
@@ -28,7 +30,7 @@ cmake --build build
 
 ### target
 
-- [ ] run successfully in windows
+- [x] run successfully in windows
 
 - [ ] update the class of DateTime, add timezone support and improve computational speed。
 
