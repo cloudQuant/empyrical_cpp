@@ -330,6 +330,16 @@ private:
 
 };
 
+struct Drawdown {
+    double rate;
+    std::string begin_date;
+    std::string end_date;
+
+    bool operator<(const Drawdown& other) const {
+        return rate < other.rate;
+    }
+};
+
 // 假设 func 是一个接受两个参数的函数
 using CustomFunc = std::function<double(const std::vector<double>&,
                                         const std::map<std::string, double>)>;

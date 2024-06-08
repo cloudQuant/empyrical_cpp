@@ -326,6 +326,48 @@ inline double max_drawdown_from_net_values(const std::vector<double>& net_values
     return max_dd;  // 返回负值表示最大回撤
 }
 
+// 计算n次最大回撤，开始时间和结束时间
+inline std::vector<Drawdown> cal_n_drawdown_from_net_values(const MySeries& net_values,
+                                                 std::size_t num){
+    std::vector<Drawdown> drawdown_list;
+    if (net_values.values.empty()){return drawdown_list;}
+    double max_value = -std::numeric_limits<double>::infinity();
+    double min_value = std::numeric_limits<double>::infinity();
+    std::string begin_date, end_date;
+    std::string day;
+    double value;
+    for (std::size_t i = 0; i<net_values.values.size(); i++) {
+        day = net_values.string_index[i];
+        value = net_values.values[i];
+        if (value > max_value) {
+            if (min_value < max_value) {
+                double drawdown_rate = (min_value - max_value) / max_value;
+                drawdown_list.push_back({drawdown_rate, begin_date, end_date});
+            }
+            max_value = value;
+            min_value = value;
+            begin_date = day;
+        }
+        if (value <= min_value) {
+            min_value = value;
+            end_date = day;
+        }
+    }
+
+    double drawdown_rate = (min_value - max_value) / max_value;
+    drawdown_list.push_back({drawdown_rate, begin_date, end_date});
+
+    if (drawdown_list.size() > num) {
+        std::sort(drawdown_list.begin(), drawdown_list.end());
+    }
+
+    if (drawdown_list.size() > static_cast<size_t>(num)) {
+        drawdown_list.resize(num);
+    }
+
+    return drawdown_list;
+}
+
 // 计算复利年化收益率
 inline double annual_return_from_simple_return(const std::vector<double>& returns,
                                         const std::string & period="daily",
