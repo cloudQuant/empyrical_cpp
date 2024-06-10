@@ -24,6 +24,7 @@ cmake --build build
 ### compile success
 1. win11 64 + vs2022
 2. win11 64 + vs2017
+3. ubuntu 23.04 + gcc
 ### why re-implement the empyrical module
 
 - practise my c++ coding skills
