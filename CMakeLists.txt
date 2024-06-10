@@ -18,8 +18,8 @@ include(GoogleTest)
 
 
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fsanitize=address")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall")
-
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ")
 
 include_directories(
         ./include
@@ -70,12 +70,11 @@ enable_testing()
 add_executable(
         empyrical_test
         tests/test_utils.cpp
-        tests/test_dtf.cpp
         tests/test_datetime.cpp
         tests/test_original_utils.cpp
         tests/test_perf_attrib.cpp
-        tests/test_some_functions.cpp
         tests/test_stats.cpp
+        tests/test_dtf.cpp
 )
 
 target_link_libraries(

@@ -412,12 +412,10 @@ TEST_F(StatsTest, ConditionalValueAtRiskTest_ReturnsCorrectCVaR) {
 
 // 基本功能测试
 TEST_F(StatsTest, CalNMaxDrawdownTestBasicTest) {
-    MySeries series = {
-            .index = {},
-            .values = {100, 90, 95, 85, 80, 110, 120, 115},
-            .index_data_type = "DateTime",
-            .string_index = {"2021-01-01", "2021-01-02", "2021-01-03", "2021-01-04", "2021-01-05", "2021-01-06", "2021-01-07", "2021-01-08"}
-    };
+    MySeries series;
+    series.values = {100, 90, 95, 85, 80, 110, 120, 115};
+    series.index_data_type = "DateTime";
+    series.string_index = {"2021-01-01", "2021-01-02", "2021-01-03", "2021-01-04", "2021-01-05", "2021-01-06", "2021-01-07", "2021-01-08"};
 
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 2);
 
@@ -436,12 +434,8 @@ TEST_F(StatsTest, CalNMaxDrawdownTestBasicTest) {
 
 // 边界情况测试：输入为空
 TEST_F(StatsTest, CalNMaxDrawdownTestEmptyInputTest) {
-    MySeries series = {
-            .index = {},
-            .values = {},
-            .index_data_type = "DateTime",
-            .string_index = {}
-    };
+    MySeries series;
+    series.index_data_type = "DateTime";
 
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 2);
 
@@ -453,12 +447,10 @@ TEST_F(StatsTest, CalNMaxDrawdownTestEmptyInputTest) {
 
 // 边界情况测试：num 大于数据量
 TEST_F(StatsTest, CalNMaxDrawdownTestNumGreaterThanDataSizeTest) {
-    MySeries series = {
-            .index = {},
-            .values = {100, 90, 80},
-            .index_data_type = "DateTime",
-            .string_index = {"2021-01-01", "2021-01-02", "2021-01-03"}
-    };
+    MySeries series;
+    series.values = {100, 90, 80};
+    series.index_data_type = "DateTime";
+    series.string_index = {"2021-01-01", "2021-01-02", "2021-01-03"};
 
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 5);
 
@@ -473,13 +465,10 @@ TEST_F(StatsTest, CalNMaxDrawdownTestNumGreaterThanDataSizeTest) {
 
 // 特殊情况测试：所有净值相等
 TEST_F(StatsTest, CalNMaxDrawdownTestAllValuesEqualTest) {
-    MySeries series = {
-            .index = {},
-            .values = {100, 100, 100},
-            .index_data_type = "DateTime",
-            .string_index = {"2021-01-01", "2021-01-02", "2021-01-03"}
-    };
-
+    MySeries series;
+    series.values = {100, 100, 100};
+    series.index_data_type = "DateTime";
+    series.string_index = {"2021-01-01", "2021-01-02", "2021-01-03"};
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 2);
 
     ASSERT_EQ(drawdowns.size(), 1);
@@ -490,12 +479,10 @@ TEST_F(StatsTest, CalNMaxDrawdownTestAllValuesEqualTest) {
 
 // 特殊情况测试：净值单调递增
 TEST(CalNMaxDrawdownTest, MonotonicallyIncreasingTest) {
-    MySeries series = {
-            .index = {},
-            .values = {80, 90, 100},
-            .index_data_type = "DateTime",
-            .string_index = {"2021-01-01", "2021-01-02", "2021-01-03"}
-    };
+    MySeries series;
+    series.values = {80, 90, 100};
+    series.index_data_type = "DateTime";
+    series.string_index = {"2021-01-01", "2021-01-02", "2021-01-03"};
 
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 2);
 

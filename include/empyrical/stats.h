@@ -231,13 +231,14 @@ inline MySeries aggregate_returns(const MySeries& returns, const std::string& co
             double ret = values[i];
             double now_month = now_datetime.get_month();
             double pre_month = datetime_0.get_month();
-            if (now_month!= pre_month and (now_month==4|now_month==7||now_month==10|now_month==1)){
+            if (now_month!= pre_month && (now_month==4|now_month==7||now_month==10|now_month==1)){
                 double month_ret = cum_returns_final(data,0);
                 new_returns.push_back(month_ret);
                 new_index.push_back(now_datetime);
                 datetime_0 = now_datetime;
                 data = {ret};
-            }else{
+            }
+            else{
                 data.push_back(ret);
                 if (i==index.size()-1){
                     double month_ret = cum_returns_final(data,0);
