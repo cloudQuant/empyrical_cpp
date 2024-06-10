@@ -20,6 +20,10 @@ cmake --build build
 # windows
 # ./build/Debug/empyrical_test.exe
 ```
+
+### compile success
+1. win11 64 + vs2022
+2. win11 64 + vs2017
 ### why re-implement the empyrical module
 
 - practise my c++ coding skills
