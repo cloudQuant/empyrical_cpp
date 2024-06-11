@@ -862,13 +862,13 @@ inline double up_capture(std::vector<double>& returns,
                   std::vector<double>&factor_returns,
                   const std::string& period="daily",
                   std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
-    cal_func::print_vector(returns, "returns");
-    cal_func::print_vector(factor_returns, "factor_returns");
+    //cal_func::print_vector(returns, "returns");
+    //cal_func::print_vector(factor_returns, "factor_returns");
     auto result = only_up(returns, factor_returns);
     std::vector<double> new_returns1 = result.first;
     std::vector<double> new_factor_returns1 = result.second;
-    cal_func::print_vector(new_returns1, "new_returns");
-    cal_func::print_vector(new_factor_returns1, "new_factor_returns");
+    //cal_func::print_vector(new_returns1, "new_returns");
+    //cal_func::print_vector(new_factor_returns1, "new_factor_returns");
     double a = annual_return_from_simple_return(new_returns1,period,annualization);
     double b = annual_return_from_simple_return(new_factor_returns1,period,annualization);
     return a/b;
@@ -879,13 +879,13 @@ inline double down_capture(std::vector<double>& returns,
                   const std::string& period="daily",
                   std::size_t annualization = std::numeric_limits<std::size_t>::quiet_NaN() ){
 
-    cal_func::print_vector(returns, "returns");
-    cal_func::print_vector(factor_returns, "factor_returns");
+    //cal_func::print_vector(returns, "returns");
+    //cal_func::print_vector(factor_returns, "factor_returns");
     auto result = only_down(returns, factor_returns);
     std::vector<double> new_returns1 = result.first;
     std::vector<double> new_factor_returns1 = result.second;
-    cal_func::print_vector(new_returns1, "new_returns");
-    cal_func::print_vector(new_factor_returns1, "new_factor_returns");
+    //cal_func::print_vector(new_returns1, "new_returns");
+    //cal_func::print_vector(new_factor_returns1, "new_factor_returns");
     double a = annual_return_from_simple_return(new_returns1,period,annualization);
     double b = annual_return_from_simple_return(new_factor_returns1,period,annualization);
     return a/b;
@@ -986,8 +986,8 @@ inline std::vector<double> roll_up_down_capture(std::vector<double>& returns,
     // 初始化窗口数据
     std::vector<double> new_returns(returns.begin(), returns.begin() + window);
     std::vector<double> new_factor_returns(factor_returns.begin(), factor_returns.begin() + window);
-    cal_func::print_vector(new_returns, "new_returns0");
-    cal_func::print_vector(new_factor_returns, "new_factor_returns0");
+    //cal_func::print_vector(new_returns, "new_returns0");
+    //cal_func::print_vector(new_factor_returns, "new_factor_returns0");
     // 计算初始窗口的值
     double v = up_down_capture(new_returns, new_factor_returns, period, annualization);
     data.push_back(v);
@@ -995,8 +995,8 @@ inline std::vector<double> roll_up_down_capture(std::vector<double>& returns,
     // 滑动窗口计算后续值
     for (std::size_t i = window; i < size; ++i) {
         // 滑动窗口移除第一个元素，添加新元素
-        cal_func::print_vector(new_returns, "new_returns");
-        cal_func::print_vector(new_factor_returns, "new_factor_returns");
+        //cal_func::print_vector(new_returns, "new_returns");
+        //cal_func::print_vector(new_factor_returns, "new_factor_returns");
         new_returns.erase(new_returns.begin());
         new_returns.push_back(returns[i]);
         new_factor_returns.erase(new_factor_returns.begin());
@@ -1187,7 +1187,7 @@ inline double beta_fragility_heuristic_aligned(const std::vector<double>& return
 
     // Combine returns and factor returns into pairs
     std::vector<std::pair<double, double>> pairs;
-    for (size_t i = 0; i < returns.size(); ++i) {
+    for (std::size_t i = 0; i < returns.size(); ++i) {
         if (!std::isnan(returns[i]) && !std::isnan(factor_returns[i])) {
             pairs.emplace_back(returns[i], factor_returns[i]);
         }
@@ -1201,11 +1201,15 @@ inline double beta_fragility_heuristic_aligned(const std::vector<double>& return
     std::sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
         return a.second < b.second;
     });
-
+    std::cout << "sort data = [ ";
+    for (auto pair : pairs){
+        std::cout << "[ " << pair.first << " , " << pair.second << " ], ";
+    }
+    std::cout << " ] " << std::endl;
     // Find the three vectors, using median of 3
-    size_t start_index = 0;
-    size_t mid_index = pairs.size() / 2;
-    size_t end_index = pairs.size() - 1;
+    std::size_t start_index = 0;
+    std::size_t mid_index = pairs.size() / 2;
+    std::size_t end_index = pairs.size() - 1;
 
     double start_returns = pairs[start_index].first;
     double mid_returns = pairs[mid_index].first;
@@ -1340,7 +1344,7 @@ inline std::vector<double> gpd_loglikelihood_minimizer_aligned(const std::vector
 
     initial_params[0] = result.xmin[0];
     initial_params[1] = result.xmin[1];
-    cal_func::print_vector(initial_params, "initial_params");
+    //cal_func::print_vector(initial_params, "initial_params");
     return initial_params;
 }
 

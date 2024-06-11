@@ -419,9 +419,9 @@ TEST_F(StatsTest, CalNMaxDrawdownTestBasicTest) {
 
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 2);
 
-    for (auto d: drawdowns){
-        std::cout << "drawdown = " << d.rate << "begin_date = " << d.begin_date << "end_date" << d.end_date << std::endl;
-    }
+//    for (auto d: drawdowns){
+//        std::cout << "drawdown = " << d.rate << "begin_date = " << d.begin_date << "end_date" << d.end_date << std::endl;
+//    }
     ASSERT_EQ(drawdowns.size(), 2);
     EXPECT_NEAR(drawdowns[0].rate, -0.2, 1e-5);
     EXPECT_EQ(drawdowns[0].begin_date, "2021-01-01");
@@ -439,9 +439,9 @@ TEST_F(StatsTest, CalNMaxDrawdownTestEmptyInputTest) {
 
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 2);
 
-    for (auto d: drawdowns){
-        std::cout << "drawdown = " << d.rate << "begin_date = " << d.begin_date << "end_date" << d.end_date << std::endl;
-    }
+//    for (auto d: drawdowns){
+//        std::cout << "drawdown = " << d.rate << "begin_date = " << d.begin_date << "end_date" << d.end_date << std::endl;
+//    }
     ASSERT_EQ(drawdowns.size(), 0);
 }
 
@@ -454,9 +454,9 @@ TEST_F(StatsTest, CalNMaxDrawdownTestNumGreaterThanDataSizeTest) {
 
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 5);
 
-    for (auto d: drawdowns){
-        std::cout << "drawdown = " << d.rate << "begin_date = " << d.begin_date << "end_date" << d.end_date << std::endl;
-    }
+//    for (auto d: drawdowns){
+//        std::cout << "drawdown = " << d.rate << "begin_date = " << d.begin_date << "end_date" << d.end_date << std::endl;
+//    }
     ASSERT_EQ(drawdowns.size(), 1);
     EXPECT_NEAR(drawdowns[0].rate, -0.2, 1e-5);
     EXPECT_EQ(drawdowns[0].begin_date, "2021-01-01");
@@ -486,9 +486,9 @@ TEST(CalNMaxDrawdownTest, MonotonicallyIncreasingTest) {
 
     std::vector<Drawdown> drawdowns = cal_n_drawdown_from_net_values(series, 2);
 
-    for (auto d: drawdowns){
-        std::cout << "drawdown = " << d.rate << "begin_date = " << d.begin_date << "end_date" << d.end_date << std::endl;
-    }
+//    for (auto d: drawdowns){
+//        std::cout << "drawdown = " << d.rate << "begin_date = " << d.begin_date << "end_date" << d.end_date << std::endl;
+//    }
     ASSERT_EQ(drawdowns.size(), 1);
     EXPECT_NEAR(drawdowns[0].rate, 0.0, 1e-5);
     EXPECT_EQ(drawdowns[0].begin_date, "2021-01-03");

@@ -71,10 +71,11 @@ add_executable(
         empyrical_test
         tests/test_utils.cpp
         tests/test_datetime.cpp
-        tests/test_original_utils.cpp
+        # tests/test_original_utils.cpp
         tests/test_perf_attrib.cpp
         tests/test_stats.cpp
         tests/test_dtf.cpp
+        tests/test_original_utils.cpp
 )
 
 target_link_libraries(

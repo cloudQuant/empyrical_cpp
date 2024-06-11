@@ -1611,6 +1611,7 @@ TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_2){
             positive_returns_value, simple_benchmark_value);
     //ASSERT_TRUE(std::isnan(actual_value));
     double expect_value = 0;
+    std::cout << "actual_value = " << actual_value << " expect_value = " << expect_value << std::endl;
     ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
 
@@ -1619,6 +1620,7 @@ TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_3){
             mixed_returns_value, simple_benchmark_value);
     //ASSERT_TRUE(std::isnan(actual_value));
     double expect_value = 0.09;
+    std::cout << "actual_value = " << actual_value << " expect_value = " << expect_value << std::endl;
     ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
 
@@ -1627,6 +1629,7 @@ TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_4){
             negative_returns_value, simple_benchmark_value);
     //ASSERT_TRUE(std::isnan(actual_value));
     double expect_value = -0.029999999999999999;
+    std::cout << "actual_value = " << actual_value << " expect_value = " << expect_value << std::endl;
     ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
 
@@ -2148,7 +2151,7 @@ TEST_F(OriginalStatsTest, test_roll_up_down_capture_5){
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {-1.65241701e-04, -1.65241719e-04,
                                         -6.89541957e-03};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         // ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2164,7 +2167,7 @@ TEST_F(OriginalStatsTest, test_roll_down_capture_1){
     auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 1);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {NAN};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2180,7 +2183,7 @@ TEST_F(OriginalStatsTest, test_roll_down_capture_2){
     auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 1);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {NAN};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2196,7 +2199,7 @@ TEST_F(OriginalStatsTest, test_roll_down_capture_3){
     auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 6);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {1,1,1};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         //ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2212,7 +2215,7 @@ TEST_F(OriginalStatsTest, test_roll_down_capture_4){
     auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 6);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {-11.2743862, -11.2743862, -11.27400221};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         //ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2228,7 +2231,7 @@ TEST_F(OriginalStatsTest, test_roll_down_capture_5){
     auto actual_value = roll_down_capture(new_returns1, new_returns2, "daily", 6);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {0.92058591, 0.92058591, 0.99956026};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         //ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2245,7 +2248,7 @@ TEST_F(OriginalStatsTest, test_roll_up_capture_1){
     auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 1);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {NAN};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2261,7 +2264,7 @@ TEST_F(OriginalStatsTest, test_roll_up_capture_2){
     auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 1);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {1};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         //ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2277,7 +2280,7 @@ TEST_F(OriginalStatsTest, test_roll_up_capture_3){
     auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 6);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {1,1,1};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         //ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2293,7 +2296,7 @@ TEST_F(OriginalStatsTest, test_roll_up_capture_4){
     auto actual_value = roll_up_capture(new_returns1, new_returns2, "daily", 6);
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {0.00291564, 0.00171499, 0.0777048};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         //ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2310,7 +2313,7 @@ TEST_F(OriginalStatsTest, test_roll_up_capture_5){
     //ASSERT_TRUE(std::isnan(actual_value[0]));
     std::vector<double> expect_value = {-1.52119182e-04, -1.52119198e-04,
                                         -6.89238735e-03};
-    cal_func::print_vector(actual_value, "actual_value");
+    //cal_func::print_vector(actual_value, "actual_value");
     for (std::size_t i=0;i<expect_value.size();++i){
         //std::cout << "actual = " << actual_value[i] << " expect = " << expect_value[i] << std::endl;
         //ASSERT_TRUE(std::isnan(actual_value[i]));
@@ -2684,7 +2687,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_1){
     std::vector<double> actual_value = result.values;
     std::vector<double> expect_value = {0.01,
                                         0.03030099999999991};
-    cal_func::print_vector(actual_value,"actual_value");
+    //cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
     }
@@ -2696,7 +2699,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_2){
     MySeries result = aggregate_returns(simple_benchmark,"quarterly");
     std::vector<double> actual_value = result.values;
     std::vector<double> expect_value = {0.04060401};
-    cal_func::print_vector(actual_value,"actual_value");
+    //cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
     }
@@ -2708,7 +2711,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_3){
     MySeries result = aggregate_returns(simple_benchmark,"yearly");
     std::vector<double> actual_value = result.values;
     std::vector<double> expect_value = {0.04060401};
-    cal_func::print_vector(actual_value,"actual_value");
+    //cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
     }
@@ -2719,7 +2722,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_4){
     std::vector<double> actual_value = result.values;
     std::vector<double> expect_value = {0.0, 0.087891200000000058,
                                         -0.04500459999999995};
-    cal_func::print_vector(actual_value,"actual_value");
+    //cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
     }
@@ -2729,7 +2732,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_5){
     MySeries result = aggregate_returns(weekly_returns,"yearly");
     std::vector<double> actual_value = result.values;
     std::vector<double> expect_value = {0.038931091700480147};
-    cal_func::print_vector(actual_value,"actual_value");
+    //cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
     }
@@ -2739,7 +2742,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_6){
     MySeries result = aggregate_returns(monthly_returns,"yearly");
     std::vector<double> actual_value = result.values;
     std::vector<double> expect_value = {0.038931091700480147};
-    cal_func::print_vector(actual_value,"actual_value");
+    //cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
     }
@@ -2751,7 +2754,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_7){
     std::vector<double> expect_value = {0.11100000000000021,
                                         0.008575999999999917,
                                         -0.072819999999999996};
-    cal_func::print_vector(actual_value,"actual_value");
+    //cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
     }
@@ -2763,7 +2766,7 @@ TEST_F(OriginalStatsTest, test_aggregate_returns_8){
     std::vector<double> expect_value = {0.0,
                                         0.040604010000000024,
                                         };
-    cal_func::print_vector(actual_value,"actual_value");
+    //cal_func::print_vector(actual_value,"actual_value");
     for (std::size_t i=0; i<expect_value.size(); ++i){
         ASSERT_NEAR(actual_value[i], expect_value[i], 0.000001);
     }

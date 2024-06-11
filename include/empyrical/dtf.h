@@ -172,19 +172,19 @@ namespace dtf {
      * 这个函数用于计算一个数字的位数。
      */
     inline std::size_t num_chars(std::uint64_t v) {
-        std::cout << " input v = " << v << std::endl;
+        //std::cout << " input v = " << v << std::endl;
         // MAX LEN OF SIZE_T IS 20
         std::size_t n = 1;
         v = (v >= 100000000000000000ull) ? ((n += 17),v / 100000000000000000ull) : v;
-        std::cout << "v = " << v << " n = " << n << std::endl;
+        //std::cout << "v = " << v << " n = " << n << std::endl;
         v = (v >= 100000000ull) ? ((n += 8),v / 100000000ull) : v;
-        std::cout << "v = " << v << " n = " << n << std::endl;
+        //std::cout << "v = " << v << " n = " << n << std::endl;
         v = (v >= 10000ull) ? ((n += 4),v / 10000ull) : v;
-        std::cout << "v = " << v << " n = " << n << std::endl;
+        //std::cout << "v = " << v << " n = " << n << std::endl;
         v = (v >= 100ull) ? ((n += 2),v / 100ull) : v;
-        std::cout << "v = " << v << " n = " << n << std::endl;
+        //std::cout << "v = " << v << " n = " << n << std::endl;
         n = (v >= 10ull) ? n + 1 : n;
-        std::cout << "v = " << v << " n = " << n << std::endl;
+        //std::cout << "v = " << v << " n = " << n << std::endl;
 
         return n;
     }
@@ -203,7 +203,7 @@ namespace dtf {
             *p-- = static_cast<char>('0'+(v % 10));
             v /= 10;
             n-=1;
-            std::cout << "n = " << n << " v = " << v << "*p = " << *(p+1) << std::endl;
+            //std::cout << "n = " << n << " v = " << v << "*p = " << *(p+1) << std::endl;
         }
     }
 
@@ -216,7 +216,7 @@ namespace dtf {
  * @return n: std::size_t
  */
     inline std::size_t timestamp_to_chars(char *buf, std::uint64_t ts, std::size_t f) {
-        std::cout << "original ts = " << ts << std::endl;
+        //std::cout << "original ts = " << ts << std::endl;
 
         if (f & flags::secs){
             ts = ts / 1000000000ull;
@@ -228,9 +228,9 @@ namespace dtf {
             ts = ts / 1000ull;
         } else{
         }
-        std::cout << "new ts = " << ts << std::endl;
+        //std::cout << "new ts = " << ts << std::endl;
         const auto n = num_chars(ts);
-        std::cout << "n = " << n << std::endl;
+        //std::cout << "n = " << n << std::endl;
         utoa(buf, n, ts);
 
         return n;
