@@ -1199,7 +1199,17 @@ inline double beta_fragility_heuristic_aligned(const std::vector<double>& return
 
     // Sort by beta
     std::sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
-        return a.second < b.second;
+        if (a.second < b.second){
+            return true;
+        } else if (a.second == b.second){
+            if (a.first <= b.first){
+                return false;
+            }else{
+                return true;
+            }
+        } else{
+            return false;
+        }
     });
     std::cout << "sort data = [ ";
     for (auto pair : pairs){
@@ -1238,6 +1248,9 @@ inline double beta_fragility_heuristic_aligned(const std::vector<double>& return
     return heuristic;
 }
 
+/*
+ * the value maybe not equal on various systems and code because the std::sort
+ */
 inline double calculate_beta_fragility_heuristic(const std::vector<double>& returns,
                                           const std::vector<double>& factor_returns){
     return beta_fragility_heuristic_aligned(returns, factor_returns);

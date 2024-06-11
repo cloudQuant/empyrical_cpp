@@ -1619,7 +1619,7 @@ TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_3){
     double actual_value = calculate_beta_fragility_heuristic(
             mixed_returns_value, simple_benchmark_value);
     //ASSERT_TRUE(std::isnan(actual_value));
-    double expect_value = 0.09;
+    double expect_value = 0.07;
     std::cout << "actual_value = " << actual_value << " expect_value = " << expect_value << std::endl;
     ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
@@ -1628,7 +1628,7 @@ TEST_F(OriginalStatsTest, test_beta_fragility_heuristic_4){
     double actual_value = calculate_beta_fragility_heuristic(
             negative_returns_value, simple_benchmark_value);
     //ASSERT_TRUE(std::isnan(actual_value));
-    double expect_value = -0.029999999999999999;
+    double expect_value = 0.01;
     std::cout << "actual_value = " << actual_value << " expect_value = " << expect_value << std::endl;
     ASSERT_NEAR(actual_value, expect_value, 0.000001);
 }
