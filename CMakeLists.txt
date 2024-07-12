@@ -37,6 +37,7 @@ set(EMPYRICAL_HEADERS
         include/empyrical/stats.h
         include/empyrical/dtf.h
         include/empyrical/datetime.h
+        include/empyrical/algorithm.h
 )
 
 set(EMPYRICAL_SOURCES
@@ -76,6 +77,7 @@ add_executable(
         tests/test_stats.cpp
         tests/test_dtf.cpp
         tests/test_original_utils.cpp
+        tests/test_algorithm.cpp
 )
 
 target_link_libraries(
