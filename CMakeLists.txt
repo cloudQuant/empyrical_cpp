@@ -16,7 +16,6 @@ FetchContent_MakeAvailable(googletest)
 include(GoogleTest)
 
 
-
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall  -fsanitize=address")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ")
@@ -78,6 +77,7 @@ add_executable(
         tests/test_dtf.cpp
         tests/test_original_utils.cpp
         tests/test_algorithm.cpp
+        tests/test_adf.cpp
 )
 
 target_link_libraries(
